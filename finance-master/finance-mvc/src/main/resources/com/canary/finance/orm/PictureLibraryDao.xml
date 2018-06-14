@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.PictureLibraryDao" >
+  <resultMap id="ResultMap" type="PictureLibrary" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="link" property="link" jdbcType="VARCHAR" />
+    <result column="platform" property="platform" jdbcType="TINYINT" />
+    <result column="status" property="status" jdbcType="TINYINT" />
+  </resultMap>
+  <sql id="columns" >
+    id, name, url, content, link, status, platform
+  </sql>
+  <select id="selectForWebsite" resultMap="ResultMap">
+    select <include refid="columns" /> from picture_library where platform = 2 and status = 1;
+  </select>
+  <select id="selectForMobile" resultMap="ResultMap">
+    select id, name, url, link content, link, status, platform
+    from picture_library where platform = 1 and status = 1;
+  </select>
+  <select id="selectById" resultMap="ResultMap">
+    select <include refid="columns" /> from picture_library where id = #{id}
+  </select>
+</mapper>

@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.CustomerCouponDao" >
+  <resultMap id="ResultMap" type="CustomerCoupon" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="order_no" property="orderNO" jdbcType="VARCHAR" />
+    <result column="amount" property="amount" jdbcType="DOUBLE" />
+    <result column="gmt_modified" property="createTime" jdbcType="TIMESTAMP" />
+    <association property="coupon" javaType="Coupon">
+      <id column="coupon_id" property="id" />
+      <result column="coupon_name" property="name" />
+      <result column="category" property="category" jdbcType="TINYINT" />
+	  <result column="amount" property="amount" jdbcType="INTEGER" />
+	  <result column="condition" property="condition" jdbcType="VARCHAR" />
+	  <result column="expiry_date" property="expiryDate" jdbcType="VARCHAR" />
+	  <result column="invest_amount" property="investAmount" jdbcType="INTEGER" />
+	  <result column="finance_period" property="financePeriod" jdbcType="INTEGER" />
+    </association>
+  </resultMap>
+  <sql id="columns">
+    cc.id, cc.order_no, cc.gmt_modified, cc.customer_id, c.name customer_name, c.cellphone, cc.amount,
+    cc. coupon_id, co.`name` coupon_name, co.category, co.amount, co.`condition`, if (co.valid_days > 0, DATE_ADD(DATE_FORMAT(cc.gmt_modified, '%Y-%m-%d'),INTERVAL co.valid_days DAY), co.expiry_date) expiry_date, co.invest_amount, co.finance_period
+ </sql>
+   <select id="queryInvitorCouponForList" resultType="InvitorCouponVO" >
+    select cc.id, cc.amount, DATE_FORMAT(cc.gmt_modified, '%Y-%m-%d %H:%i:%S') createTime, cr.cellphone
+	from customer_coupon cc
+	LEFT JOIN customer cr on cr.id = cc.invitor_id
+	where invitor_id > 0 and cc.customer_id = #{customerId} 
+  	ORDER BY cc.gmt_modified desc
+    <choose>
+	  <when test="offset > 0 and size > 0">
+      <![CDATA[
+      limit #{offset}, #{size}
+      ]]>
+	  </when>
+	  <when test="size > 0">
+      <![CDATA[
+      limit 0, #{size}
+      ]]>
+	  </when>
+	  <otherwise>
+	  <![CDATA[
+	    limit 0, 15
+	  ]]>
+	  </otherwise>
+	</choose>
+  </select>
+  <select id="queryInvitorCouponForCount" resultType="int">
+    select count(*)
+	from customer_coupon cc
+	LEFT JOIN customer cr on cr.id = cc.invitor_id
+	where invitor_id > 0 and cc.customer_id = #{customerId} 
+  </select>
+  <select id="queryVOForList" resultType="CustomerCouponVO" >
+    select cc.id, cc.amount, c.`name`, c.category, c.invest_amount investAmount, c.`condition`, 
+    if (c.valid_days > 0, DATE_ADD(DATE_FORMAT(cc.gmt_modified, '%Y-%m-%d'),INTERVAL c.valid_days DAY), c.expiry_date) expiryDate,
+	c.finance_period financePeriod
+    from customer_coupon cc
+	left join coupon c on c.id = cc.coupon_id
+	where cc.order_no = '' and if (c.valid_days > 0, DATE_ADD(DATE_FORMAT(cc.gmt_modified, '%Y-%m-%d'),INTERVAL c.valid_days DAY)> CURRENT_DATE(), 1=1)  
+		and cc.customer_id = #{customerId}
+    order by cc.id desc
+  </select>
+  <select id="queryForList" resultMap="ResultMap">
+    select <include refid="columns" /> 
+    from customer_coupon cc
+	left join customer c on c.id = cc.customer_id
+	left join coupon co on co.id = cc.coupon_id
+	<where>
+      <if test="customerId > 0">
+      	cc.customer_id = #{customerId}
+      </if>
+	</where>
+	order by cc.id desc
+	<choose>
+	  <when test="offset > 0 and size > 0">
+      limit #{offset}, #{size}
+	  </when>
+	  <when test="size > 0">
+      <![CDATA[
+      limit 0, #{size}
+      ]]>
+	  </when>
+	  <otherwise>
+	  <![CDATA[
+	  limit 0, 15
+	  ]]>
+	  </otherwise>
+	</choose>
+  </select>
+  <select id="queryForCount" resultType="int">
+  	select count(*) from customer_coupon
+	<where>
+      <if test="customerId > 0">
+      	customer_id = #{customerId}
+      </if>
+	</where>
+  </select>
+  <select id="selectByCustomerIdAndStatus" resultMap="ResultMap">
+    select <include refid="columns" /> from customer_coupon cc
+	left join customer c on c.id = cc.customer_id
+	left join coupon co on co.id = cc.coupon_id
+	<where>
+	  <if test="customerId > 0">
+      	cc.customer_id = #{customerId}
+      </if>
+	</where>
+	  order by cc.id desc
+  </select>
+  <select id="selectById" resultMap="ResultMap">
+  	select <include refid="columns" /> 
+  	from customer_coupon cc
+	left join customer c on c.id = cc.customer_id
+	left join coupon co on co.id = cc.coupon_id
+	where cc.id = #{id} and if (co.valid_days > 0, DATE_ADD(DATE_FORMAT(cc.gmt_modified, '%Y-%m-%d'),INTERVAL co.valid_days DAY)> CURRENT_DATE(), 1=1)
+  </select>
+  <insert id="insert" parameterType="CustomerCoupon" useGeneratedKeys="true" keyProperty="id">
+     insert into customer_coupon
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="coupon != null and coupon.id >0" >
+        coupon_id,
+      </if>
+      <if test="customer != null and customer.id > 0">
+        customer_id, 
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="coupon != null and  coupon.id > 0" >
+        #{coupon.id,jdbcType=INTEGER},
+      </if>
+      <if test="customer != null and customer.id > 0" >
+        #{customer.id,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <insert id="insertCustomerCoupons" >
+  	insert into customer_coupon(customer_id, invitor_id, coupon_id, amount, gmt_modified) values
+  	<foreach collection="customerCoupons" item="customerCoupon" index="index" separator=",">
+	   (#{customerCoupon.customerId}, 
+	   #{customerCoupon.invitorId}, 
+	   <choose>
+		  <when test="customerCoupon.coupon.id > 0"> 
+	      	#{customerCoupon.coupon.id},
+		  </when>
+		  <otherwise>
+		  	0,
+		  </otherwise>
+		</choose>
+	   #{customerCoupon.amount},
+	   #{customerCoupon.createTime})
+	 </foreach>
+  </insert>
+  <update id="insertBatch">
+  	insert into customer_coupon(coupon_id, customer_id) values
+    <foreach collection="coupons" item="coupon" index="index" separator=",">
+    (#{coupon.coupon.id,jdbcType=INTEGER}, #{coupon.customer.id,jdbcType=INTEGER})
+    </foreach>
+  </update>
+  <update id="update">
+  	update customer_coupon set order_no = #{orderNO,jdbcType=VARCHAR}, used_time = #{usedTime,jdbcType=TIMESTAMP}
+  	where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

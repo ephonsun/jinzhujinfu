@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.ActivityDao" >
+  <resultMap id="ResultMap" type="Activity" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="image" property="image" jdbcType="VARCHAR" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="begin_date" property="beginDate" jdbcType="VARCHAR" />
+    <result column="end_date" property="endDate" jdbcType="VARCHAR" />
+    <result column="introduction" property="introduction" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="TINYINT" />
+  </resultMap>
+  <sql id="columns" >
+    id, title, image, url, introduction, content, begin_date, end_date, status
+  </sql>
+  <select id="queryForList" resultMap="ResultMap">
+    select <include refid="columns" /> from activity 
+    <where>
+      <if test="status >= 0">
+      	status = #{status,jdbcType=TINYINT}
+      </if>
+    </where>
+    order by status desc
+    <choose>
+	  <when test="offset > 0 and size > 0">
+      <![CDATA[
+      limit #{offset}, #{size}
+      ]]>
+	  </when>
+	  <when test="size > 0">
+      <![CDATA[
+      limit 0, #{size}
+      ]]>
+	  </when>
+	  <otherwise>
+	  <![CDATA[
+	    limit 0, 15
+	  ]]>
+	  </otherwise>
+	</choose>
+  </select>
+  <select id="queryForCount" resultType="int">
+  	select count(*) from activity
+  	<where>
+      <if test="status >= 0">
+      	status = #{status,jdbcType=TINYINT}
+      </if>
+    </where>
+  </select>
+  <select id="selectById" resultMap="ResultMap" parameterType="java.lang.Integer" >
+    select <include refid="columns" /> from activity where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectByTitle" resultMap="ResultMap">
+    select <include refid="columns" /> from activity where title = #{title,jdbcType=VARCHAR}
+  </select>
+  <insert id="insert" parameterType="Activity">
+    insert into activity
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="title != null" >
+        title,
+      </if>
+      <if test="image != null " >
+        image,
+      </if>
+      <if test="url != null " >
+        url,
+      </if>
+      <if test="introduction != null" >
+        introduction,
+      </if>
+      <if test="content != null " >
+        content,
+      </if>
+      <if test="beginDate != null" >
+        begin_date,
+      </if>
+      <if test="endDate != null " >
+        end_date,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="title != null" >
+        #{title,jdbcType=VARCHAR}, 
+      </if>
+      <if test="image != null" >
+        #{image,jdbcType=VARCHAR}, 
+      </if>
+      <if test="url != null" >
+        #{url,jdbcType=VARCHAR}, 
+      </if>
+      <if test="introduction != null" >
+        #{introduction,jdbcType=VARCHAR}, 
+      </if>
+      <if test="content != null " >
+        #{content,jdbcType=VARCHAR}, 
+      </if>
+      <if test="beginDate != null" >
+        #{beginDate,jdbcType=VARCHAR}, 
+      </if>
+      <if test="endDate != null " >
+        #{endDate,jdbcType=VARCHAR}, 
+      </if>
+    </trim>
+  </insert>
+  <update id="update" parameterType="Activity" >
+    update activity
+    <set >
+      <if test="title != null" >
+        title =  #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="image != null" >
+        image = #{image,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null" >
+        url = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="introduction != null" >
+        introduction = #{introduction,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null " >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="beginDate != null" >
+        begin_date = #{beginDate,jdbcType=VARCHAR},
+      </if>
+      <if test="endDate != null " >
+        end_date = #{endDate,jdbcType=VARCHAR},
+      </if>
+      <if test="status >= 0" >
+        status = #{status,jdbcType=TINYINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

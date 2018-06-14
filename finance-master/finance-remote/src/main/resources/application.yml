@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: remoting-service
+  jmx:
+    enabled: false
+    
+logging:
+  level:
+    com.silverfox: info
+  file: /data/log/silverfox.remoting.log
+  
+canary: 
+  finance:
+    remote: 
+      #server-ip: 127.0.0.1
+      server-ip: 172.16.10.241
+      server-port: 10000
+      server-error: "{\"code\":500,\"msg\":\"Internal Server Error\",\"result\":\"%s\"}"
+      not-acceptable: "{\"code\":406,\"msg\":\"Not Acceptable\",\"result\":\"%s\"}"
+      default-message: "{\"code\":999,\"msg\":\"Remoting Proxy Gone,result\":\"\u7f51\u7edc\u5f02\u5e38\u6216\u53d1\u9001\u8bf7\u6c42\u8d85\u65f6\"}"
+      sms-huaxing-url: http://sh2.cshxsp.com/smsJson.aspx
+      sms-huaxing-user: jksc968
+      sms-huaxing-password: cey1356
+      sms-huaxing-action: send
+      fuiou-version: 0.44
+      merchant-code: 0003310F0556197
+      open-account-url: https://jzh.fuiou.com/jzh/reg.action
+      account-balance-url: https://jzh.fuiou.com/jzh/BalanceAction.action
+      pre-auth-url: https://jzh.fuiou.com/jzh/preAuth.action
+      transfer-account-url: https://jzh.fuiou.com/jzh/transferBmu.action
+      allocate-funds-url: https://jzh.fuiou.com/jzh/transferBu.action 
+      #merchant-code: 0002900F0041077
+      #open-account-url: https://jzh-test.fuiou.com/jzh/reg.action
+      #account-balance-url: https://jzh-test.fuiou.com/jzh/BalanceAction.action
+      #pre-auth-url: https://jzh-test.fuiou.com/jzh/preAuth.action
+      #transfer-account-url: https://jzh-test.fuiou.com/jzh/transferBmu.action
+      #allocate-funds-url: https://jzh-test.fuiou.com/jzh/transferBu.action
+      jpush-apikey: d2a5c80abe262011eb69028f
+      jpush-secretkey: dd86429d00764e6b90475909
+      jpush-ios-production: false
+      flow-account: llt-8f21573b
+      flow-password: PW00384efc
+      flow-url: http://121.40.141.168/msg/HttpBatchSendSM

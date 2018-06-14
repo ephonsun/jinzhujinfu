@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.canary.finance.orm.CouponDao" >
+    <resultMap id="ResultMap" type="Coupon" >
+    	<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="valid_days" property="validDays" jdbcType="INTEGER" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+    	<result column="category" property="category" jdbcType="TINYINT" />
+		<result column="amount" property="amount" jdbcType="INTEGER" />
+		<result column="condition" property="condition" jdbcType="VARCHAR" />
+		<result column="expiry_date" property="expiryDate" jdbcType="VARCHAR" />
+		<result column="invest_amount" property="investAmount" jdbcType="INTEGER" />
+		<result column="finance_period" property="financePeriod" jdbcType="INTEGER" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="status" property="status" jdbcType="TINYINT" />
+    </resultMap>
+    <sql id="columns" >
+    	id, `name`, category, amount, valid_days, `condition`, expiry_date, invest_amount, finance_period, remark, `status`
+	</sql>
+	<select id="queryForList" resultMap="ResultMap">
+		select <include refid="columns" /> from coupon
+		<where>
+		     <if test="name != null">
+		    	and name like '%${name}%'   
+		    </if>
+			<if test="category >= 0">
+		    	and category = #{category}    
+		    </if>
+		    <if test="status >= 0">
+		    	and status = #{status}    
+		    </if>
+		</where>
+		order by id desc
+		<choose>
+		    <when test="offset > 0 and size > 0">
+		        <![CDATA[ limit #{offset}, #{size} ]]>
+		    </when>
+		    <when test="size > 0">
+		        <![CDATA[ limit 0, #{size} ]]>
+		    </when>
+		    <otherwise>
+			    <![CDATA[ limit 0, 15 ]]>
+		    </otherwise>
+	    </choose>
+	</select>
+	<select id="queryForCount" resultType="int">
+		select count(*) from coupon
+		<where>
+		     <if test="name != null">
+		    	and name like '%${name}%'   
+		    </if>
+			<if test="category >= 0">
+		    	and category = #{category}    
+		    </if>
+		    <if test="status >= 0">
+		    	and status = #{status}    
+		    </if>
+		</where>    
+	</select>
+	<select id="selectByStatus" resultMap="ResultMap" parameterType="int">
+	  select <include refid="columns" /> from coupon where status = #{status}
+	</select>
+	<select id="selectById" resultMap="ResultMap" parameterType="int">
+	  select <include refid="columns" /> from coupon where id = #{id}
+	</select>
+	<select id="selectByName" resultMap="ResultMap">
+	  select <include refid="columns" /> from coupon where name = #{name}
+	</select>
+	<insert id="insert">
+	    insert into coupon
+	     <trim prefix="(" suffix=")" suffixOverrides="," >
+	         <if test="name != null">
+	         	name,  
+	         </if>
+	         <if test="category >= 0">
+	         	category,  
+	         </if>
+	         <if test="amount >= 0">
+	         	amount,  
+	         </if>
+	         <if test="condition != null">
+	         	`condition`,  
+	         </if>
+	         <if test="expiryDate != null">
+	         	expiry_date,  
+	         </if>
+	         <if test="investAmount >= 0">
+	         	invest_amount,  
+	         </if>
+	         <if test="financePeriod >= 0">
+	         	finance_period,  
+	         </if>
+	         <if test="validDays >= 0">
+	         	valid_days,  
+	         </if>
+	         <if test="remark != null">
+	         	remark,  
+	         </if>
+	     </trim>
+	     <trim prefix="values (" suffix=")" suffixOverrides=",">
+	         <if test="name != null">
+	            #{name,jdbcType=VARCHAR},
+	         </if>
+	         <if test="category >= 0">
+	         	#{category,jdbcType=TINYINT},  
+	         </if>
+	         <if test="amount >= 0">
+	         	#{amount,jdbcType=INTEGER},  
+	         </if>
+	         <if test="condition != null">
+	         	#{condition,jdbcType=VARCHAR},
+	         </if>
+	         <if test="expiryDate != null">
+	            #{expiryDate,jdbcType=VARCHAR},
+	         </if>
+	         <if test="investAmount >= 0">
+	         	#{investAmount,jdbcType=INTEGER}, 
+	         </if>
+	         <if test="financePeriod >= 0">
+	            #{financePeriod,jdbcType=INTEGER},
+	         </if>
+	         <if test="validDays >= 0">
+	            #{validDays,jdbcType=INTEGER},
+	         </if>
+	         <if test="remark != null">
+	         	#{remark,jdbcType=VARCHAR}, 
+	         </if>
+	     </trim>
+	</insert>
+	<update id="update">
+		update coupon
+		<set>
+	         <if test="name != null">
+	            name = #{name,jdbcType=VARCHAR},
+	         </if>
+			<if test="category >= 0">
+	         	category = #{category,jdbcType=TINYINT},  
+	         </if>
+	         <if test="amount >= 0">
+	            amount = #{amount,jdbcType=INTEGER},
+	         </if>
+	         <if test="condition != null">
+	            `condition` = #{condition,jdbcType=VARCHAR},
+	         </if>
+	         <if test="expiryDate != null">
+	         	expiry_date = #{expiryDate,jdbcType=VARCHAR},
+	         </if>
+	         <if test="investAmount >= 0">
+	         	invest_amount = #{investAmount,jdbcType=TINYINT}, 
+	         </if>
+	         <if test="financePeriod >= 0">
+	            finance_period = #{financePeriod,jdbcType=INTEGER},
+	         </if>
+	         <if test="validDays >= 0">
+	            valid_days = #{validDays,jdbcType=INTEGER},
+	         </if>
+	         <if test="remark != null">
+	         	remark = #{remark,jdbcType=VARCHAR}, 
+	         </if> 
+	         <if test="status >= 0">
+	         	status = #{status,jdbcType=TINYINT},   
+	         </if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+</mapper>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.FeedbackDao" >
+  <resultMap id="ResultMap" type="Feedback" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="contact" property="contact" jdbcType="VARCHAR" />
+    <result column="phone_model" property="phoneModel" jdbcType="VARCHAR" />
+    <result column="device_version" property="deviceVersion" jdbcType="VARCHAR" />
+    <result column="app_version" property="appVersion" jdbcType="VARCHAR" />
+    <result column="feed_time" property="feedTime" jdbcType="TIMESTAMP" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="columns" >
+	id, contact, phone_model, device_version, app_version, feed_time, content
+  </sql>
+  <select id="queryForList" resultMap="ResultMap">
+    select <include refid="columns" /> from feedback
+    <where>
+      <if test="contact != null">
+	    contact like '%${contact}%'
+	  </if>
+	  <if test="content != null">
+	    and content like '%${content}%'
+	  </if>
+	  <if test="beginTime != null and endTime != null">
+	    <![CDATA[
+      	and #{beginTime} <= DATE_FORMAT(feed_time,'%Y-%m-%d') and #{endTime} >= DATE_FORMAT(feed_time,'%Y-%m-%d')
+      	]]>
+	  </if>
+    </where>
+    ORDER BY id desc
+    <choose>
+	  <when test="offset > 0 and size > 0">
+      <![CDATA[
+      limit #{offset}, #{size}
+      ]]>
+	  </when>
+	  <when test="size > 0">
+      <![CDATA[
+      limit 0, #{size}
+      ]]>
+	  </when>
+	  <otherwise>
+	  <![CDATA[
+	  limit 0, 15
+	  ]]>
+	  </otherwise>
+	</choose>
+  </select>
+  <select id="queryForCount" resultType="int">
+  	select count(*) from feedback
+  	<where>
+      <if test="contact != null">
+	    contact like '%${contact}%'
+	  </if>
+	  <if test="content != null">
+	    and content like '%${content}%'
+	  </if>
+	  <if test="beginTime != null and endTime != null">
+     	<![CDATA[
+      	and #{beginTime} <= DATE_FORMAT(feed_time,'%Y-%m-%d') and #{endTime} >= DATE_FORMAT(feed_time,'%Y-%m-%d')
+      	]]>
+	  </if>
+    </where>
+  </select>
+  <insert id="insert" parameterType="Feedback">
+    insert into feedback
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="contact != null" >
+        contact,
+      </if>
+      <if test="phoneModel != null" >
+        phone_model,
+      </if>
+      <if test="deviceVersion != null" >
+        device_version,
+      </if>
+      <if test="appVersion != null" >
+        app_version,
+      </if>
+      <if test="content != null" >
+        content,
+      </if>
+      	feed_time
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="contact != null" >
+        #{contact,jdbcType=VARCHAR},
+      </if>
+      <if test="phoneModel != null" >
+        #{phoneModel,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceVersion != null" >
+        #{deviceVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="appVersion != null" >
+        #{appVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=VARCHAR},
+      </if>
+      	now()
+    </trim>
+  </insert>
+</mapper>

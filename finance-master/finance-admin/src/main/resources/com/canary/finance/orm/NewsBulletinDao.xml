@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.NewsBulletinDao">
+  <resultMap type="NewsBulletin" id="resultMap">
+    <id column="id" property="id" jdbcType="INTEGER"/>
+	<result column="type" property="type" jdbcType="TINYINT"/>
+	<result column="status" property="status" jdbcType="TINYINT"/>
+	<result column="hits" property="hits" jdbcType="INTEGER"/>
+	<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	<association property="news" javaType="NewsMaterial">
+	  <id column="news_id" property="id" jdbcType="INTEGER"/>
+	  <result column="news_title"  property="title" jdbcType="VARCHAR" />
+	  <result column="news_source"  property="source" jdbcType="VARCHAR" />
+	</association>
+  </resultMap>
+	<sql id="columns">
+	  a.id, a.news_id, a.type, a.status, a.hits, a.create_time, n.title news_title, n.source news_source
+	</sql>
+	<select id="queryForList" resultMap="resultMap">
+	  select <include refid="columns"/> from news_bulletin a 
+	  left join news_material n on a.news_id = n.id
+	  <where>
+        <if test="status >= 0 ">
+          and a.status = #{status}
+        </if>
+        <if test="type > 0 ">
+          and a.type = #{type}  
+        </if>
+	    <if test="title != null">
+          and n.title like '%${title}%'    
+        </if>
+      </where>
+      order by a.status, a.id desc
+      <choose>
+		<when test="offset > 0 and size > 0">
+		  <![CDATA[
+		    limit #{offset}, #{size}
+		  ]]>
+		</when>
+		<when test="size > 0">
+		  <![CDATA[
+		    limit 0, #{size}
+		  ]]>
+		</when>
+		<otherwise>
+		<![CDATA[
+		  limit 0, 15
+		]]>
+		</otherwise>
+      </choose>
+	</select>
+	<select id="queryForCount" resultType="int">
+	  select count(*) from news_bulletin a 
+	  left join news_material n on a.news_id = n.id
+	  <where>
+        <if test="status >= 0 ">
+          and a.status = #{status}
+        </if>
+        <if test="type > 0 ">
+          and a.type = #{type}  
+        </if>
+	    <if test="title != null">
+          and n.title like '%${title}%'    
+        </if>
+      </where>
+	</select>
+	<select id="selectById" resultMap="resultMap">
+	  select <include refid="columns"/> from news_bulletin a left join news_material n on a.news_id = n.id where a.id = #{id}
+	</select>
+	<insert id="insert" parameterType="NewsBulletin" >
+	  insert into news_bulletin
+	  <trim prefix="(" suffix=")" suffixOverrides=",">
+	    <if test="news != null and news.id > 0">
+	      news_id,    
+	    </if>
+	    <if test="type > 0">
+	      type,
+	    </if>
+	    <if test="status >= 0">
+	      status,
+	    </if>
+	  </trim>
+	  <trim prefix="values (" suffix=")" suffixOverrides=",">
+	    <if test="news != null and news.id > 0">
+	      #{news.id,jdbcType=VARCHAR},    
+	    </if>
+	    <if test="type > 0">
+	      #{type,jdbcType=INTEGER},
+	    </if>
+	    <if test="status >= 0">
+	      #{status,jdbcType=INTEGER},
+	    </if>
+	  </trim>
+	</insert>
+	<update id="update" parameterType="NewsBulletin">
+	  update news_bulletin
+	  <set>
+	  <if test="news != null and news.id > 0">
+	    news_id = #{news.id,jdbcType=INTEGER},    
+	  </if>
+	  <if test="type > 0">
+	    type = #{type,jdbcType=TINYINT},
+	  </if>
+	  <if test="hits > 0">
+	    hits = #{hits,jdbcType=INTEGER},
+	  </if>
+	  <if test="status >= 0">
+	    status = #{status,jdbcType=TINYINT},
+	  </if>
+	 </set>
+	 where id = #{id}
+   </update>
+</mapper>

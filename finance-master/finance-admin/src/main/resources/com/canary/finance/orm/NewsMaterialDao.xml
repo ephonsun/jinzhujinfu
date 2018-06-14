@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.NewsMaterialDao" >
+  <resultMap id="ResultMap" type="NewsMaterial" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="source" property="source" jdbcType="VARCHAR" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="image" property="image" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="news_date" property="newsDate" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="columns" >
+    id, title, source, url, image, content, remark, news_date
+  </sql>
+  <select id="queryForList" resultMap="ResultMap">
+    select <include refid="columns" /> from news_material order by news_date desc, id desc
+    <choose>
+	  <when test="offset > 0 and size > 0">
+        <![CDATA[ limit #{offset}, #{size} ]]>
+	  </when>
+	  <when test="size > 0">
+        <![CDATA[ limit 0, #{size} ]]>
+	  </when>
+	  <otherwise>
+	    <![CDATA[ limit 0, 15 ]]>
+	  </otherwise>
+	</choose>
+  </select>
+  <select id="queryForCount" resultType="java.lang.Integer" >
+    select count(*) from news_material
+  </select>
+  <select id="selectById" resultMap="ResultMap" parameterType="int" >
+    select <include refid="columns" /> from news_material where id = #{id}
+  </select>
+  <select id="selectByTitle" resultMap="ResultMap" >
+    select <include refid="columns" /> from news_material where title = #{title}
+  </select>
+  <insert id="insert" parameterType="NewsMaterial" useGeneratedKeys="true" keyProperty="id" >
+    insert into news_material
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+	    <if test="title != null">
+	      title,    
+	    </if>
+	    <if test="source != null">
+	      source,
+	    </if>
+	    <if test="url != null">
+	      url,
+	    </if>
+	    <if test="image != null">
+	      image,
+	    </if>
+	    <if test="content != null">
+	      content,
+	    </if>
+	    <if test="remark != null">
+	      remark,
+	    </if>
+	    <if test="newsDate != null">
+	      news_date,
+	    </if>
+	  </trim>
+	  <trim prefix="values (" suffix=")" suffixOverrides=",">
+	    <if test="title != null">
+	      #{title,jdbcType=VARCHAR},    
+	    </if>
+	    <if test="source != null">
+	      #{source,jdbcType=VARCHAR},
+	    </if>
+	    <if test="url != null">
+	      #{url,jdbcType=VARCHAR},
+	    </if>
+	    <if test="image != null">
+	      #{image,jdbcType=VARCHAR},
+	    </if>
+	    <if test="content != null">
+	      #{content,jdbcType=VARCHAR},
+	    </if>
+	    <if test="remark != null">
+	      #{remark,jdbcType=VARCHAR},
+	    </if>
+	    <if test="newsDate != null">
+	      #{newsDate,jdbcType=VARCHAR},
+	    </if>
+	  </trim>
+  </insert>
+  <update id="update" parameterType="NewsMaterial" >
+    update news_material
+    <set>
+        <if test="title != null">
+            title = #{title,jdbcType=VARCHAR},
+        </if>
+        <if test="source != null">
+            source = #{source,jdbcType=VARCHAR},
+        </if>
+        <if test="url != null">
+            url = #{url,jdbcType=VARCHAR},
+        </if>
+        <if test="image != null">
+            image = #{image,jdbcType=VARCHAR},
+        </if>
+        <if test="content != null">
+            content = #{content,jdbcType=VARCHAR},
+        </if>
+        <if test="remark != null">
+            remark = #{remark,jdbcType=VARCHAR},
+        </if>
+        <if test="newsDate != null">
+            news_date = #{newsDate,jdbcType=VARCHAR},
+        </if>
+    </set> 
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.FaqDao">
+	<resultMap type="Faq" id="resultMap">
+	    <id column="id" property="id" jdbcType="INTEGER"/>
+	    <result column="ask" property="ask" jdbcType="VARCHAR"/>
+	    <result column="question" property="question" jdbcType="VARCHAR"/>
+	    <result column="status" property="status" jdbcType="TINYINT"/>
+	</resultMap>
+	<sql id="columns">
+	    id, ask, question, status
+	</sql>
+	<select id="selectAll" resultMap="resultMap">
+	    select <include refid="columns"/> from faq order by status desc
+	</select>
+	<select id="queryForList" resultMap="resultMap">
+	  select <include refid="columns" /> from faq where status = 1
+	  <choose>
+		<when test="offset > 0 and size > 0">
+	      <![CDATA[ limit #{offset}, #{size}]]>
+		</when>
+		<when test="size > 0">
+	      <![CDATA[ limit 0, #{size}]]>
+		</when>
+		<otherwise>
+		  <![CDATA[
+		    limit 0, 15
+		  ]]>
+		</otherwise>
+	  </choose>
+	</select>
+	<select id="queryForCount" resultType="int">
+  		<![CDATA[ select count(*) from faq where status = 1 ]]>
+  	</select>
+  	<select id="selectById" resultMap="resultMap">
+	    select <include refid="columns"/> from faq where id = #{id}
+	</select>
+	<select id="selectByAsk" resultMap="resultMap">
+	    select <include refid="columns"/> from faq where ask = #{ask,jdbcType=VARCHAR}
+    </select>
+	<insert id="insert" parameterType="Faq" >
+	    insert into faq
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	    	<if test="ask != null">
+	    		ask,    
+	    	</if>
+	    	<if test="question != null">
+	    		question,    
+	    	</if>
+	    	<if test="status">
+	    	    status,
+	    	</if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides=",">
+	        <if test="ask != null">
+	    		#{ask,jdbcType=VARCHAR},    
+	    	</if>
+	    	<if test="question != null">
+	    		#{question,jdbcType=VARCHAR},    
+	    	</if>
+	    	<if test="status">
+	    	    #{status,jdbcType=INTEGER},
+	    	</if>
+	    </trim>
+	</insert>
+	<update id="update" parameterType="Faq">
+	    update faq
+	    <set>
+			<if test="ask != null">
+				ask = #{ask,jdbcType=VARCHAR},    
+			</if>
+			<if test="question != null">
+				question = #{question,jdbcType=VARCHAR},    
+			</if>
+			<if test="status >= 0">
+				status = #{status,jdbcType=TINYINT},
+			</if>
+	    </set>
+	    where id = #{id}
+	</update>
+	<delete id="delete" parameterType="int">
+		delete from faq where id = #{id}    
+    </delete>  
+</mapper>

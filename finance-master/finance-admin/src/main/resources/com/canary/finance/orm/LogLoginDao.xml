@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.LogLoginDao" >
+  <resultMap id="ResultMap" type="LogLogin" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="login_time" property="loginTime" jdbcType="VARCHAR" />
+    <result column="logout_time" property="logoutTime" jdbcType="VARCHAR" />
+    <result column="ip" property="ip" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="columns" >
+	id, `name`, login_time, logout_time, ip
+  </sql>
+  <select id="queryForList" resultMap="ResultMap">
+    select 
+    <include refid="columns" />
+    from log_login
+    <where>
+      <if test="name != null">
+	    `name` like '%${name}%'
+	  </if>
+	  <if test="beginTime != null and endTime != null">
+	  <![CDATA[
+      	and #{beginTime} <= (DATE_FORMAT(login_time,'%Y-%m-%d') and #{endTime} >= DATE_FORMAT(login_time,'%Y-%m-%d'))
+	  ]]>     
+      </if>
+    </where>
+    order by id desc
+    <choose>
+	  <when test="offset > 0 and size > 0">
+      <![CDATA[
+      limit #{offset}, #{size}
+      ]]>
+	  </when>
+	  <when test="size > 0">
+      <![CDATA[
+      limit 0, #{size}
+      ]]>
+	  </when>
+	  <otherwise>
+	  <![CDATA[
+	  limit 0, 15
+	  ]]>
+	  </otherwise>
+	</choose>
+  </select>
+  <select id="queryForCount" resultType="int">
+  	select count(*) from log_login
+  	<where>
+      <if test="name != null">
+	    `name` like '%${name}%'
+	  </if>
+	  <if test="beginTime != null and endTime != null">
+      	<![CDATA[
+      	and #{beginTime} <= DATE_FORMAT(login_time,'%Y-%m-%d') and #{endTime} >= DATE_FORMAT(login_time,'%Y-%m-%d')
+      	]]>
+      </if>
+    </where>
+  </select>
+  <insert id="insert" parameterType="LogLogin">
+    insert into log_login
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="ip != null" >
+        ip,
+      </if>
+        login_time
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="ip != null" >
+        #{ip,jdbcType=VARCHAR},
+      </if>
+        now()
+    </trim>
+  </insert>
+  <update id="update" parameterType="LogLogin" >
+    update log_login
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="ip != null" >
+        ip = #{ip,jdbcType=VARCHAR},
+      </if>
+        logout_time = now()
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="finance-admin:war">
+    <output-path>$PROJECT_DIR$/finance-master/finance-admin/target</output-path>
+    <root id="archive" name="finance-admin-1.0.0.war">
+      <element id="artifact" artifact-name="finance-admin:war exploded" />
+    </root>
+  </artifact>
+</component>

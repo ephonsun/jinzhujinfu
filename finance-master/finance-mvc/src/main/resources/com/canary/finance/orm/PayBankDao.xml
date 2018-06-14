@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.canary.finance.orm.PayBankDao" >
+  <resultMap id="ResultMap" type="PayBank" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="bank_name" property="bankName" jdbcType="VARCHAR" />
+    <result column="bank_no" property="bankNO" jdbcType="VARCHAR" />
+    <result column="single_limit" property="singleLimit" jdbcType="INTEGER" />
+    <result column="day_limit" property="dayLimit" jdbcType="INTEGER" />
+    <result column="month_limit" property="monthLimit" jdbcType="INTEGER" />
+    <result column="category" property="category" jdbcType="TINYINT" />
+    <result column="status" property="status" jdbcType="TINYINT" />
+  </resultMap>
+  <sql id="columns" >
+    id, bank_no, bank_name, single_limit, day_limit, month_limit, category, status
+  </sql>
+  <select id="selectByStatus" resultMap="ResultMap">
+    select <include refid="columns" /> from pay_bank where status = #{status,jdbcType=TINYINT}
+  </select>
+  <select id="selectById" parameterType="int" resultMap="ResultMap">
+    select <include refid="columns" /> from pay_bank where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectByBankNO" resultMap="ResultMap">
+    select <include refid="columns" /> from pay_bank where bank_no = #{bankNO,jdbcType=VARCHAR} limit 1
+  </select>
+  <select id="queryForProvinces" resultType="RegionCode">
+    select id, province, province_id provinceId
+    from region_code
+    group by province_id
+  </select>
+  <select id="queryForCities" resultType="RegionCode">
+    select id, province, province_id provinceId, city, city_id cityId
+    from region_code
+    where province_id = #{provinceId}
+  </select>
+</mapper>

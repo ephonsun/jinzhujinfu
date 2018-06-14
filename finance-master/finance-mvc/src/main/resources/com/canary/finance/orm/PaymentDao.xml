@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.PaymentDao" >
+  <insert id="batchInsert" parameterType="java.util.List">
+	insert into payment_out (order_no, pay_detail, sign, pay_date, product_id, account) values 
+	<foreach collection="payments" item="payment" index="index" separator="," >    
+      (#{payment.orderNO,jdbcType=VARCHAR}, #{payment.payDetail,jdbcType=VARCHAR}, #{payment.sign,jdbcType=VARCHAR},
+       #{payment.payDate,jdbcType=VARCHAR}, #{payment.productId,jdbcType=INTEGER}, #{payment.account,jdbcType=VARCHAR})    
+    </foreach>
+  </insert>
+</mapper>

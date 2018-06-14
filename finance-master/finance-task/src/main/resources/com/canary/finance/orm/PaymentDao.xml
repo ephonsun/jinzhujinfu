@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.PaymentDao" >
+  <resultMap id="ResultMap" type="Payment" >
+    <id column="order_no" property="orderNO" jdbcType="VARCHAR" />
+    <result column="pay_detail" property="payDetail" jdbcType="VARCHAR" />
+    <result column="sign" property="sign" jdbcType="VARCHAR" />
+    <result column="pay_date" property="payDate" jdbcType="VARCHAR" />
+    <result column="product_id" property="productId" jdbcType="INTEGER" />
+    <result column="account" property="account" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="card_no" property="cardNO" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <sql id="columns" >
+	order_no, pay_detail, sign, pay_date, product_id, account, user_id, card_no
+  </sql>
+  <select id="selectByOrderNO" resultMap="ResultMap">
+    select <include refid="columns" /> from payment_out where order_no = #{orderNO,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByDate" resultMap="ResultMap">
+  	select <include refid="columns" /> from payment_out where pay_date = #{payDate,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByDateAndProductId" resultMap="ResultMap">
+  	select <include refid="columns" /> 
+  	from payment_out 
+  	where pay_date = #{payDate,jdbcType=VARCHAR} and product_id = #{productId,jdbcType=INTEGER}
+  </select>
+  <insert id="insertBalanceLogInBatch" parameterType="java.util.List">
+	insert into customer_balance(customer_id, serial_no, category, amount, response_code, response_desc, gmt_modified) values
+	<foreach collection="logs" item="log" index="index" separator="," >    
+      (#{log.customer.id,jdbcType=INTEGER}, 
+      #{log.serialNO,jdbcType=VARCHAR}, 
+      #{log.category,jdbcType=INTEGER}, 
+      #{log.amount,jdbcType=DOUBLE}, 
+      #{log.responseCode,jdbcType=VARCHAR}, 
+      #{log.responseDesc,jdbcType=VARCHAR}, 
+      #{log.createTime,jdbcType=TIMESTAMP})    
+    </foreach>
+  </insert>
+  <insert id="batchInsertMessages" parameterType="java.util.List">
+	insert into customer_message (scene, customer_id, message, effect_time) values 
+	<foreach collection="messages" item="message" index="index" separator="," >    
+      (#{message.scene,jdbcType=TINYINT}, #{message.customerId,jdbcType=INTEGER}, #{message.message,jdbcType=VARCHAR}, #{message.effectTime,jdbcType=TIMESTAMP})    
+    </foreach>
+  </insert>
+  <update id="paybackInBatch" parameterType="CustomerOrder">
+  	<foreach collection="orders" item="order" index="index" separator=";">
+    	update customer_order
+   		<set>
+   		    payback_amount = #{order.paybackAmount},
+   		    payback_time = #{order.paybackTime}
+   		</set> 
+        where payback_no = #{order.paybackNO,jdbcType=VARCHAR}
+    </foreach>
+  </update>
+  <delete id="delete" parameterType="java.lang.String">
+    delete from payment_out where order_no = #{orderNO,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteBatch" parameterType="java.util.List">
+    <![CDATA[delete from payment_out where order_no in ( ]]>
+    <foreach collection="payments" item="payment" index="index" separator="," >
+      #{payment.orderNO,jdbcType=VARCHAR}
+    </foreach>
+    <![CDATA[ ) ]]>
+  </delete>
+</mapper>

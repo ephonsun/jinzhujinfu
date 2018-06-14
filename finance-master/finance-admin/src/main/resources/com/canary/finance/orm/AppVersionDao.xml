@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.AppVersionDao" >
+  <resultMap id="ResultMap" type="AppVersion" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="version" property="version" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="TINYINT" />
+  </resultMap>
+  <sql id="columns" >
+	id, version, content, url, type, status
+  </sql>
+  <select id="queryForList" resultMap="ResultMap">
+    select <include refid="columns" /> from app_version
+    <where>
+        <if test="version != null">
+            and version like '%${version}%'
+        </if>
+        <if test="content != null">
+            and content like '%${content}%'
+        </if>
+    </where>
+    ORDER BY id DESC
+    <choose>
+	  <when test="offset > 0 and size > 0">
+      <![CDATA[
+      limit #{offset}, #{size}
+      ]]>
+	  </when>
+	  <when test="size > 0">
+      <![CDATA[
+      limit 0, #{size}
+      ]]>
+	  </when>
+	  <otherwise>
+	  <![CDATA[
+	  limit 0, 15
+	  ]]>
+	  </otherwise>
+	</choose>
+  </select>
+  <select id="queryForCount" resultType="int">
+  	select count(*) from app_version
+  	<where>
+        <if test="version != null">
+            and version like '%${version}%'
+        </if>
+        <if test="content != null">
+            and content like '%${content}%'
+        </if>
+    </where>
+  </select>
+  <select id="selectById" parameterType="java.lang.Integer" resultMap="ResultMap">
+    select <include refid="columns" /> from app_version where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectByVersion" resultMap="ResultMap">
+	select <include refid="columns" /> from app_version where version = #{version,jdbcType=VARCHAR}
+  </select>
+  <insert id="insert" parameterType="AppVersion">
+    insert into app_version
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="version != null" >
+        version,
+      </if>
+      <if test="content != null" >
+        content,
+      </if>
+      <if test="url != null" >
+        url,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="version != null" >
+        #{version,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null" >
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="update" parameterType="AppVersion" >
+    update app_version
+    <set >
+      <if test="version != null" >
+        version = #{version,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null" >
+        url = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="status >= 0" >
+        status = #{status,jdbcType=TINYINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

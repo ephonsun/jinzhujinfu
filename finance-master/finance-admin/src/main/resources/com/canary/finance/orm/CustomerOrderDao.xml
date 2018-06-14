@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.CustomerOrderDao" >
+  <resultMap id="ResultMap" type="CustomerOrder" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="order_no" property="orderNO" jdbcType="VARCHAR" />
+    <result column="principal" property="principal" jdbcType="INTEGER" />
+    <result column="fee" property="fee" jdbcType="DOUBLE" />
+    <result column="coupon_amount" property="couponAmount" jdbcType="DOUBLE" />
+    <result column="order_time" property="orderTime" jdbcType="TIMESTAMP" />
+    <result column="pay_type" property="payType" jdbcType="TINYINT" />
+    <result column="payback_amount" property="paybackAmount" jdbcType="DOUBLE" />
+    <result column="payback_time" property="paybackTime" jdbcType="TIMESTAMP" />
+    <result column="payback_no" property="paybackNO" jdbcType="VARCHAR" />
+    <association property="product" javaType="Product">
+      <id column="product_id" property="id" />
+      <result column="product_name" property="name" />
+      <result column="finance_period" property="financePeriod" />
+    </association>
+    <association property="customer" javaType="Customer">
+      <id column="customer_id" property="id" />
+      <result column="customer_name" property="name" />
+      <result column="cellphone" property="cellphone" />
+      <association property="channel" javaType="Channel">
+	    <id column="channel_id" property="id" />
+	    <result column="channel_name" property="name" />
+	  </association>
+    </association>
+  </resultMap>
+  <sql id="columns">
+    co.id, co.order_no, co.principal, co.fee, co.coupon_amount, co.order_time, co.pay_type, co.payback_amount, co.payback_time, co.payback_no,
+    p.id product_id, p.name product_name, p.finance_period, c.id customer_id, c.name customer_name, c.cellphone, ch.id channel_id, ch.name channel_name
+  </sql>
+  <select id="queryForList" resultMap="ResultMap">
+    select <include refid="columns" /> 
+    from customer_order co
+	left join customer c on c.id = co.customer_id
+	left join channel ch on c.channel_id = ch.id
+	left join product p on p.id = co.product_id
+	<where>
+	  <if test="orderNO != null">
+      	co.order_no = #{orderNO}
+      </if>
+      <if test="orderType == 1">
+        and co.payback_amount > 0
+      </if>
+      <if test="payType > 0">
+      	and co.pay_type = #{payType}
+      </if>
+      <if test="channelId > 0"> 
+      	and c.channel_id = #{channelId}
+      </if>
+      <if test="name != null">
+      	and c.name like '${name}%'
+      </if>
+      <if test="cellphone != null">
+      	and c.cellphone like '${cellphone}%'
+      </if>
+      <if test="productName != null">
+        and p.name like '${productName}%'
+      </if>
+      <if test="orderType == 0">
+      	<if test="amountFrom > 0 and amountTo >= amountFrom">
+      	<![CDATA[
+      	and co.principal >= #{amountFrom} and co.principal <= #{amountTo}
+      	]]>
+      	</if>
+      	<if test="beginTime != null and endTime != null">
+      	<![CDATA[
+      	and #{beginTime} <= DATE_FORMAT(co.order_time,'%Y-%m-%d') and #{endTime} >= DATE_FORMAT(co.order_time,'%Y-%m-%d')
+      	]]>
+        </if>
+      </if>
+      <if test="orderType == 1">
+      	<if test="amountFrom > 0 and amountTo >= amountFrom">
+      	<![CDATA[
+      	and co.payback_amount >= #{amountFrom} and co.payback_amount <= #{amountTo}
+      	]]>
+      	</if>
+      	<if test="beginTime != null and endTime != null">
+      	<![CDATA[
+      	and #{beginTime} <= DATE_FORMAT(co.payback_time,'%Y-%m-%d') and #{endTime} >= DATE_FORMAT(co.payback_time,'%Y-%m-%d')
+      	]]>
+        </if>
+      </if>
+	</where>
+	  order by id desc
+	<choose>
+	  <when test="offset > 0 and size > 0">
+      limit #{offset}, #{size}
+	  </when>
+	  <when test="size > 0">
+      <![CDATA[
+      limit 0, #{size}
+      ]]>
+	  </when>
+	  <otherwise>
+	  <![CDATA[
+	  limit 0, 15
+	  ]]>
+	  </otherwise>
+	</choose>
+  </select>
+  <select id="queryForCount" resultType="int">
+  	select count(*) from customer_order co
+	left join customer c on c.id = co.customer_id
+	left join channel ch on c.channel_id = ch.id
+	left join product p on p.id = co.product_id
+	<where>
+	  <if test="orderNO != null">
+      	co.order_no = #{orderNO}
+      </if>
+      <if test="orderType == 1">
+        and co.payback_amount > 0
+      </if>
+      <if test="payType > 0">
+      	and co.pay_type = #{payType}
+      </if>
+      <if test="channelId > 0"> 
+      	and c.channel_id = #{channelId}
+      </if>
+      <if test="name != null">
+      	and c.name like '${name}%'
+      </if>
+      <if test="cellphone != null">
+      	and c.cellphone like '${cellphone}%'
+      </if>
+      <if test="productName != null">
+        and p.name like '${productName}%'
+      </if>
+      <if test="orderType == 0">
+      	<if test="amountFrom > 0 and amountTo >= amountFrom">
+      	<![CDATA[
+      	and co.principal >= #{amountFrom} and co.principal <= #{amountTo}
+      	]]>
+      	</if>
+      	<if test="beginTime != null and endTime != null">
+      	<![CDATA[
+      	and #{beginTime} <= DATE_FORMAT(co.order_time,'%Y-%m-%d') and #{endTime} >= DATE_FORMAT(co.order_time,'%Y-%m-%d')
+      	]]>
+        </if>
+      </if>
+      <if test="orderType == 1">
+      	<if test="amountFrom > 0 and amountTo >= amountFrom">
+      	<![CDATA[
+      	and co.payback_amount >= #{amountFrom} and co.payback_amount <= #{amountTo}
+      	]]>
+      	</if>
+      	<if test="beginTime != null and endTime != null">
+      	<![CDATA[
+      	and #{beginTime} <= DATE_FORMAT(co.payback_time,'%Y-%m-%d') and #{endTime} >= DATE_FORMAT(co.payback_time,'%Y-%m-%d')
+      	]]>
+        </if>
+      </if>
+	</where>
+  </select>
+  <select id="selectById" resultMap="ResultMap">
+    select <include refid="columns" /> from customer_order co
+	left join customer c on c.id = co.customer_id
+	left join channel ch on c.channel_id = ch.id
+	left join product p on p.id = co.product_id
+	where co.id = #{id}
+  </select>
+  <select id="selectByOrderNO" resultMap="ResultMap">
+    select <include refid="columns" /> from customer_order co
+	left join customer c on c.id = co.customer_id
+	left join channel ch on c.channel_id = ch.id
+	left join product p on p.id = co.product_id
+	where co.order_no = #{orderNO}
+  </select>
+  <select id="selectByProductId" resultType="ExportDataVO">
+    SELECT cor.order_no orderNO, cor.principal, cr.cellphone customerAccount,
+		cr.name customerName, mt.cellphone merchantAccount, mt.name merchantName, cor.contract_no contractNO
+	from customer_order cor
+	left join product prt on prt.id = cor.product_id
+	left join merchant mt on mt.id = prt.merchant_id
+	left join customer cr on cr.id = cor.customer_id
+	where cor.product_id = #{productId} and cor.contract_no != ''
+  </select>
+  <select id="queryPaybackForList" resultType="PaybackVO">
+    select cor.payback_no paybackNO, cor.principal principal,
+	ROUND(cor.principal*prt.year_income*prt.finance_period/36500, 2) profit, 
+	ROUND(cor.principal*prt.loan_year_income*prt.finance_period/36500, 2) serviceCharge, 
+	mt.cellphone outAccount, cr.cellphone inAccount, 
+	prt.name productName, cr.id customerId, (cor.principal+ROUND(cor.principal*prt.year_income*prt.finance_period/36500, 2)+ROUND(cor.principal*prt.increase_interest*prt.finance_period/36500, 2)+cor.coupon_amount) paybackAmount
+	from customer_order cor
+	left join product prt on prt.id = cor.product_id
+	left join customer cr on cr.id = cor.customer_id
+	left join merchant mt on mt.id = prt.merchant_id
+	where cor.product_id = #{productId} and cor.payback_amount = 0 and prt.payback != 4
+  </select>
+  <select id="queryCouponForList" resultType="PaybackVO">
+   select cor.payback_no paybackNO, cor.principal principal,
+	cor.coupon_amount profit, cr.cellphone inAccount
+	from customer_order cor
+	left join customer cr on cr.id = cor.customer_id
+	where cor.product_id = #{productId} and cor.coupon_status != 1 and cor.coupon_amount > 0
+  </select>
+  <select id="queryIncreaseInterestForList" resultType="PaybackVO">
+   select cor.payback_no paybackNO, cor.principal principal,
+	ROUND(cor.principal*prt.increase_interest*prt.finance_period/36500, 2) profit, ROUND(cor.principal*prt.loan_year_income*prt.finance_period/36500, 2) serviceCharge, 
+	cr.cellphone inAccount
+	from customer_order cor
+	left join product prt on prt.id = cor.product_id
+	left join customer cr on cr.id = cor.customer_id
+	where cor.product_id = #{productId} and cor.increase_interest_status != 1 and prt.increase_interest > 0
+  </select>
+  <select id="sumPrincipal" resultType="java.lang.Integer">
+  	select sum(co.principal) 
+  	from customer_order co
+	left join customer c on c.id = co.customer_id
+	left join channel ch on c.channel_id = ch.id
+	left join product p on p.id = co.product_id
+	<where>
+	  <if test="orderNO != null">
+      	co.order_no = #{orderNO}
+      </if>
+      <if test="orderType == 1">
+        and co.payback_amount > 0
+      </if>
+      <if test="payType > 0">
+      	and co.pay_type = #{payType}
+      </if>
+      <if test="channelId > 0"> 
+      	and c.channel_id = #{channelId}
+      </if>
+      <if test="name != null">
+      	and c.name like '${name}%'
+      </if>
+      <if test="cellphone != null">
+      	and c.cellphone like '${cellphone}%'
+      </if>
+      <if test="productName != null">
+        and p.name like '${productName}%'
+      </if>
+      <if test="orderType == 0">
+      	<if test="amountFrom > 0 and amountTo >= amountFrom">
+      	<![CDATA[
+      	and co.principal >= #{amountFrom} and co.principal <= #{amountTo}
+      	]]>
+      	</if>
+      	<if test="beginTime != null and endTime != null">
+      	<![CDATA[
+      	and #{beginTime} <= DATE_FORMAT(co.order_time,'%Y-%m-%d') and #{endTime} >= DATE_FORMAT(co.order_time,'%Y-%m-%d')
+      	]]>
+        </if>
+      </if>
+      <if test="orderType == 1">
+      	<if test="amountFrom > 0 and amountTo >= amountFrom">
+      	<![CDATA[
+      	and co.payback_amount >= #{amountFrom} and co.payback_amount <= #{amountTo}
+      	]]>
+      	</if>
+      	<if test="beginTime != null and endTime != null">
+      	<![CDATA[
+      	and #{beginTime} <= DATE_FORMAT(co.payback_time,'%Y-%m-%d') and #{endTime} >= DATE_FORMAT(co.payback_time,'%Y-%m-%d')
+      	]]>
+        </if>
+      </if>
+	</where>
+  </select>
+  <select id="sumPaybackAmount" resultType="java.lang.Double">
+  	select sum(co.payback_amount) 
+  	from customer_order co
+	left join customer c on c.id = co.customer_id
+	left join channel ch on c.channel_id = ch.id
+	left join product p on p.id = co.product_id
+	<where>
+	  co.payback_amount > 0
+	  <if test="orderNO != null">
+      	co.order_no = #{orderNO}
+      </if>
+      <if test="orderType == 1">
+        and co.payback_amount > 0
+      </if>
+      <if test="payType > 0">
+      	and co.pay_type = #{payType}
+      </if>
+      <if test="channelId > 0"> 
+      	and c.channel_id = #{channelId}
+      </if>
+      <if test="name != null">
+      	and c.name like '${name}%'
+      </if>
+      <if test="cellphone != null">
+      	and c.cellphone like '${cellphone}%'
+      </if>
+      <if test="productName != null">
+        and p.name like '${productName}%'
+      </if>
+      <if test="orderType == 0">
+      	<if test="amountFrom > 0 and amountTo >= amountFrom">
+      	<![CDATA[
+      	and co.principal >= #{amountFrom} and co.principal <= #{amountTo}
+      	]]>
+      	</if>
+      	<if test="beginTime != null and endTime != null">
+      	<![CDATA[
+      	and #{beginTime} <= DATE_FORMAT(co.order_time,'%Y-%m-%d') and #{endTime} >= DATE_FORMAT(co.order_time,'%Y-%m-%d')
+      	]]>
+        </if>
+      </if>
+      <if test="orderType == 1">
+      	<if test="amountFrom > 0 and amountTo >= amountFrom">
+      	<![CDATA[
+      	and co.payback_amount >= #{amountFrom} and co.payback_amount <= #{amountTo}
+      	]]>
+      	</if>
+      	<if test="beginTime != null and endTime != null">
+      	<![CDATA[
+      	and #{beginTime} <= DATE_FORMAT(co.payback_time,'%Y-%m-%d') and #{endTime} >= DATE_FORMAT(co.payback_time,'%Y-%m-%d')
+      	]]>
+        </if>
+      </if>
+	</where>
+  </select>
+  <insert id="insert" parameterType="CustomerOrder" useGeneratedKeys="true" keyProperty="id">
+     insert into customer_order
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="orderNO != null" >
+        order_no,
+      </if>
+      <if test="principal > 0" >
+        principal,
+      </if>
+      <if test="fee > 0" >
+        fee,
+      </if>
+      <if test="couponAmount > 0" >
+        coupon_amount,
+      </if>
+      <if test="orderTime != null" >
+        order_time,
+      </if>
+      <if test="payType > 0" >
+        pay_type,
+      </if>
+      <if test="paybackAmount > 0" >
+        payback_amount,
+      </if>
+      <if test="paybackNO != null" >
+        payback_no,
+      </if>
+      <if test="paybackTime != null" >
+        payback_time,
+      </if>
+      <if test="product != null and product.id >0" >
+        product_id,
+      </if>
+      <if test="customer != null and customer.id > 0">
+        customer_id, 
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="orderNO != null" >
+        #{orderNO,jdbcType=VARCHAR},
+      </if>
+      <if test="principal > 0" >
+        #{principal,jdbcType=DOUBLE},
+      </if>
+      <if test="fee > 0" >
+        #{fee,jdbcType=DOUBLE},
+      </if>
+      <if test="couponAmount > 0" >
+        #{couponAmount,jdbcType=DOUBLE},
+      </if>
+      <if test="orderTime != null" >
+        #{orderTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="payType > 0" >
+        #{payType,jdbcType=TINYINT},
+      </if>
+      <if test="paybackNO != null" >
+        #{paybackNO,jdbcType=VARCHAR},
+      </if>
+      <if test="paybackAmount > 0" >
+        #{paybackAmount,jdbcType=DOUBLE},
+      </if>
+      <if test="paybackTime != null" >
+        #{paybackTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="product != null and  product.id >0" >
+        #{product.id,jdbcType=INTEGER},
+      </if>
+      <if test="customer != null and customer.id > 0" >
+        #{customer.id,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="update">
+  	update customer_order set payback_amount = #{orderMoney,jdbcType=DOUBLE}, payback_time = #{paybackTime,jdbcType=TIMESTAMP}, 
+  	payback_no = #{paybackNO,jdbcType=VARCHAR} where order_no = #{orderNO,jdbcType=VARCHAR}
+  </update>
+  <update id="updateCouponStatus">
+  	update customer_order set coupon_status = #{couponStatus} where payback_no = #{paybackNO,jdbcType=VARCHAR}
+  </update>
+  <update id="updateIncreaseInterestStatus">
+  	update customer_order set increase_interest_status = #{increaseInterestStatus} where payback_no = #{paybackNO,jdbcType=VARCHAR}
+  </update>
+  <update id="updateBatch">
+    <foreach collection="orders" item="order" index="index" separator=";">
+    update customer_order set payback_amount = #{order.paybackAmount}, payback_time = #{order.paybackTime}, 
+    payback_no = #{order.paybackNO} where order_no = #{order.orderNO,jdbcType=VARCHAR}
+     </foreach>
+  </update>
+</mapper>

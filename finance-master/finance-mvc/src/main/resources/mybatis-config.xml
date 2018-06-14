@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<settings>
+		<setting name="lazyLoadingEnabled" value="false" />
+		<setting name="logImpl" value="STDOUT_LOGGING" />
+		<!--<setting name="logImpl" value="LOG4J"/>-->
+	</settings>
+	<typeAliases>
+		<typeAlias alias="Activity" type="com.canary.finance.domain.Activity" />
+		<typeAlias alias="Admin" type="com.canary.finance.domain.Admin" />
+		<typeAlias alias="AppVersion" type="com.canary.finance.domain.AppVersion" />
+		<typeAlias alias="BranchBank" type="com.canary.finance.domain.BranchBank" />
+		<typeAlias alias="Channel" type="com.canary.finance.domain.Channel" />
+		<typeAlias alias="Coupon" type="com.canary.finance.domain.Coupon" />
+		<typeAlias alias="CouponRule" type="com.canary.finance.domain.CouponRule" />
+		<typeAlias alias="Customer" type="com.canary.finance.domain.Customer" />
+		<typeAlias alias="CustomerBalance" type="com.canary.finance.domain.CustomerBalance" />
+		<typeAlias alias="CustomerCoupon" type="com.canary.finance.domain.CustomerCoupon" />
+		<typeAlias alias="CustomerMessage" type="com.canary.finance.domain.CustomerMessage" />
+		<typeAlias alias="CustomerOrder" type="com.canary.finance.domain.CustomerOrder" />
+		<typeAlias alias="Faq" type="com.canary.finance.domain.Faq" />
+		<typeAlias alias="Feedback" type="com.canary.finance.domain.Feedback" />
+		<typeAlias alias="Merchant" type="com.canary.finance.domain.Merchant" />
+		<typeAlias alias="MerchantOrder" type="com.canary.finance.domain.MerchantOrder" />
+		<typeAlias alias="NewsBulletin" type="com.canary.finance.domain.NewsBulletin" />
+		<typeAlias alias="NewsMaterial" type="com.canary.finance.domain.NewsMaterial" />
+		<typeAlias alias="Product" type="com.canary.finance.domain.Product" />
+		<typeAlias alias="ProductCategory" type="com.canary.finance.domain.ProductCategory" />
+		<typeAlias alias="PictureLibrary" type="com.canary.finance.domain.PictureLibrary" />
+		<typeAlias alias="PayBank" type="com.canary.finance.domain.PayBank" />
+		<typeAlias alias="RegionCode" type="com.canary.finance.domain.RegionCode" />
+		
+		<typeAlias alias="InvitorCouponVO" type="com.canary.finance.pojo.InvitorCouponVO" />
+		<typeAlias alias="ProductOrderVO" type="com.canary.finance.pojo.ProductOrderVO" />
+		<typeAlias alias="MaterialVO" type="com.canary.finance.pojo.MaterialVO" />
+		<typeAlias alias="MaterialVO" type="com.canary.finance.pojo.MaterialVO" />
+		<typeAlias alias="CustomerOrderVO" type="com.canary.finance.pojo.CustomerOrderVO" />
+		<typeAlias alias="CustomerCouponVO" type="com.canary.finance.pojo.CustomerCouponVO" />
+		<typeAlias alias="CustomerBalanceVO" type="com.canary.finance.pojo.CustomerBalanceVO" />
+	</typeAliases>
+	<mappers>
+		<package name="com.canary.finance.orm" />
+	</mappers>
+</configuration>

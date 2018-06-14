@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.canary.finance.orm.MerchantDao" >
+  <resultMap id="ResultMap" type="Merchant" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="license" property="license" jdbcType="VARCHAR" />
+    <result column="license_image" property="licenseImage" jdbcType="VARCHAR" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="cellphone" property="cellphone" jdbcType="VARCHAR" />
+    <result column="bank_no" property="bankNO" jdbcType="VARCHAR" />
+    <result column="bank_name" property="bankName" jdbcType="VARCHAR" />
+    <result column="card_no" property="cardNO" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="TINYINT" />
+  </resultMap>
+  <sql id="columns" >
+    id, name, license, license_image, address, cellphone, bank_no, bank_name, card_no, status
+  </sql>
+  <select id="queryForList" resultMap="ResultMap">
+    select <include refid="columns" /> from merchant
+    <where>
+      <if test="name != null">
+      	name like '%${name}%' 
+      </if>
+      <if test="status >= 0 ">
+      	an status = #{status}
+      </if>
+    </where>
+      ORDER BY id desc
+    <choose>
+	  <when test="offset > 0 and size > 0">
+      <![CDATA[
+      limit #{offset}, #{size}
+      ]]>
+	  </when>
+	  <when test="size > 0">
+      <![CDATA[
+      limit 0, #{size}
+      ]]>
+	  </when>
+	  <otherwise>
+	  </otherwise>
+	</choose>
+  </select>
+  <select id="queryForCount" resultType="int">
+  	select count(*) from merchant
+    <where>
+      <if test="name != null">
+      	name like '%${name}%'
+      </if>
+      <if test="status >= 0 ">
+      	and status = #{status}
+      </if>
+    </where>
+  </select>
+  <select id="selectByStatus" parameterType="java.lang.Integer" resultMap="ResultMap">
+    select <include refid="columns" /> from merchant where status = #{status}
+  </select>
+  <select id="selectById" parameterType="java.lang.Integer" resultMap="ResultMap">
+    select <include refid="columns" /> from merchant where id = #{id}
+  </select>
+  <select id="selectByLicense" resultMap="ResultMap">
+    select <include refid="columns" /> from merchant where license = #{license}
+  </select>
+  <insert id="insert" parameterType="Merchant" useGeneratedKeys="true" keyProperty="id">
+    insert into merchant
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="license != null" >
+        license,
+      </if>
+      <if test="licenseImage != null" >
+        license_image,
+      </if>
+      <if test="address != null" >
+        address,
+      </if>
+      <if test="cellphone != null" >
+        cellphone,
+      </if>
+      <if test="bankNO != null" >
+        bank_no,
+      </if>
+      <if test="bankName != null" >
+        bank_name,
+      </if>
+      <if test="cardNO != null" >
+        card_no,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="license != null" >
+        #{license,jdbcType=VARCHAR},
+      </if>
+      <if test="licenseImage != null" >
+        #{licenseImage,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="cellphone != null" >
+        #{cellphone,jdbcType=VARCHAR},
+      </if>
+      <if test="bankNO != null" >
+        #{bankNO,jdbcType=VARCHAR},
+      </if>
+      <if test="bankName != null" >
+        #{bankName,jdbcType=VARCHAR},
+      </if>
+      <if test="cardNO != null" >
+        #{cardNO,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="update" parameterType="Merchant" >
+    update merchant
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="license != null" >
+        license = #{license,jdbcType=VARCHAR},
+      </if>
+      <if test="licenseImage != null" >
+        license_image = #{licenseImage,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="cellphone != null" >
+        cellphone = #{cellphone,jdbcType=VARCHAR},
+      </if>
+      <if test="bankNO != null" >
+        bank_no = #{bankNO,jdbcType=VARCHAR},
+      </if>
+      <if test="bankName != null" >
+        bank_name = #{bankName,jdbcType=VARCHAR},
+      </if>
+      <if test="cardNO != null" >
+        card_no = #{cardNO,jdbcType=VARCHAR},
+      </if>
+      <if test="status >= 0" >
+        status = #{status,jdbcType=TINYINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

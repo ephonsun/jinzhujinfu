@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.PushMessageDao" >
+  <resultMap id="ResultMap" type="PushMessage" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="push_type" property="pushType" jdbcType="TINYINT" />
+    <result column="product_id" property="productId" jdbcType="INTEGER" />
+    <result column="news_id" property="newsId" jdbcType="INTEGER" />
+    <result column="os_type" property="osType" jdbcType="TINYINT" />
+    <result column="send_type" property="sendType" jdbcType="TINYINT" />
+    <result column="send_time" property="sendTime" jdbcType="TINYINT" />
+    <result column="send_target" property="sendTarget" jdbcType="TINYINT" />
+    <result column="equipment" property="equipment" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="TINYINT" />
+    <result column="gmt_modified" property="createTime" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="columns" >
+    id, title, content, push_type, product_id, news_id, os_type, send_type, send_time, send_target, equipment, status, gmt_modified
+  </sql>
+  <select id="queryForList" resultMap="ResultMap">
+    select 
+    <include refid="columns" />
+    from push_message
+    <where>
+	  <if test="beginTime != null and endTime != null">
+      	DATE_FORMAT(send_time,'%Y-%m-%d') >= #{beginTime} and #{endTime} >= DATE_FORMAT(send_time,'%Y-%m-%d')
+      </if>
+    </where>
+    ORDER BY id desc
+    <choose>
+	  <when test="offset > 0 and size > 0">
+        <![CDATA[
+          limit #{offset}, #{size}
+        ]]>
+	  </when>
+	  <when test="size > 0">
+        <![CDATA[
+          limit 0, #{size}
+        ]]>
+	  </when>
+	  <otherwise>
+	    <![CDATA[
+	      limit 0, 15
+	    ]]>
+	  </otherwise>
+	</choose>
+  </select>
+  <select id="queryForCount" resultType="int">
+  	select count(id) from push_message
+  	<where>
+	  <if test="beginTime != null and endTime != null">
+      	DATE_FORMAT(send_time,'%Y-%m-%d') >= #{beginTime} and #{endTime} >= DATE_FORMAT(send_time,'%Y-%m-%d')
+      </if>
+    </where>
+  </select>
+  <select id="selectById" resultMap="ResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="columns" />
+    from push_message where id = #{id,jdbcType=INTEGER}
+  </select>
+  <insert id="insert" parameterType="PushMessage">
+    insert into push_message
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="title != null">
+        title,
+      </if>
+      <if test="content != null">
+        content,
+      </if>
+      <if test="pushType >= 0">
+        push_type,
+      </if>
+      <if test="productId >= 0">
+        product_id,
+      </if>
+      <if test="newsId >= 0">
+        news_id,
+      </if>
+      <if test="osType >= 0">
+        os_type,
+      </if>
+      <if test="sendType >= 0">
+        send_type,
+      </if>
+      <if test="sendTime != null">
+        send_time,
+      </if>
+      <if test="sendTarget >= 0">
+        send_target,
+      </if>
+      <if test="equipment != null">
+        equipment,
+      </if>
+      status,
+      gmt_modified
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+       <if test="title != null">
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null">
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="pushType >= 0">
+        #{pushType,jdbcType=TINYINT},
+      </if>
+      <if test="productId >= 0">
+        #{productId,jdbcType=INTEGER},
+      </if>
+      <if test="newsId >= 0">
+        #{newsId,jdbcType=INTEGER},
+      </if>
+      <if test="osType >= 0">
+        #{osType,jdbcType=TINYINT},
+      </if>
+      <if test="sendType >= 0">
+        #{sendType,jdbcType=TINYINT},
+      </if>
+      <if test="sendTime != null">
+        #{sendTime,jdbcType=VARCHAR},
+      </if>
+      <if test="sendTarget >= 0">
+        #{sendTarget,jdbcType=TINYINT},
+      </if>
+      <if test="equipment != null">
+        #{equipment,jdbcType=VARCHAR},
+      </if>
+      0,
+      now()
+    </trim>
+  </insert>
+  <update id="update" parameterType="PushMessage" >
+    update push_message
+    <set >
+      <if test="title != null">
+        title = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null">
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="pushType >= 0">
+        push_type = #{pushType,jdbcType=TINYINT},
+      </if>
+      <if test="productId >= 0">
+        product_id = #{productId,jdbcType=INTEGER},
+      </if>
+      <if test="newsId >= 0">
+        news_id = #{newsId,jdbcType=INTEGER},
+      </if>
+      <if test="osType >= 0">
+        os_type = #{osType,jdbcType=TINYINT},
+      </if>
+      <if test="sendType >= 0">
+        send_type = #{sendType,jdbcType=TINYINT}, 
+      </if>
+      <if test="sendTime != null">
+        send_time = #{sendTime,jdbcType=VARCHAR},
+      </if>
+      <if test="sendTarget >= 0">
+        send_target = #{sendTarget,jdbcType=TINYINT},
+      </if>
+      <if test="equipment != null">
+        equipment = #{equipment,jdbcType=VARCHAR},
+      </if>
+      <if test="status >= 0">
+        status = #{status,jdbcType=TINYINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateStatus" parameterType="java.lang.Integer" >
+    update push_message set status=2, send_time = if(send_type = 0, now(), send_time) where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

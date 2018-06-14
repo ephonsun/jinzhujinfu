@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.CustomerDao" >
+  <resultMap id="ResultMap" type="Customer" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="idcard" property="idcard" jdbcType="VARCHAR" />
+    <result column="cellphone" property="cellphone" jdbcType="VARCHAR" />
+    <result column="balance" property="balance" jdbcType="DOUBLE" />
+    <result column="login_password" property="loginPassword" jdbcType="VARCHAR" />
+    <result column="trade_password" property="tradePassword" jdbcType="VARCHAR" />
+    <result column="inviter_phone" property="inviterPhone" jdbcType="VARCHAR" />
+    <result column="bank_no" property="bankNO" jdbcType="VARCHAR" />
+    <result column="bank_name" property="bankName" jdbcType="VARCHAR" />
+    <result column="card_no" property="cardNO" jdbcType="VARCHAR" />
+    <result column="register_time" property="registerTime" jdbcType="TIMESTAMP" />
+    <result column="trade_time" property="tradeTime" jdbcType="TIMESTAMP" />
+  	<association property="channel" javaType="Channel">
+		<id column="channel_id" property="id" />
+		<result column="channel_name" property="name" />
+	</association>
+  </resultMap>
+  <sql id="columns" >
+    c.id, c.name, c.cellphone, c.balance, c.inviter_phone, c.idcard, c.login_password, c.trade_password, 
+    c.bank_no, c.bank_name, c.card_no, c.register_time, c.trade_time, c.channel_id, ch.name channel_name
+  </sql>
+  <select id="queryInvitorForList" resultMap="ResultMap">
+    select <include refid="columns" /> 
+  	from customer c
+  	where c.inviter_phone = #{cellphone,jdbcType=VARCHAR} 
+  	ORDER BY c.register_time desc
+    <choose>
+	  <when test="offset > 0 and size > 0">
+      <![CDATA[
+      limit #{offset}, #{size}
+      ]]>
+	  </when>
+	  <when test="size > 0">
+      <![CDATA[
+      limit 0, #{size}
+      ]]>
+	  </when>
+	  <otherwise>
+	  <![CDATA[
+	    limit 0, 15
+	  ]]>
+	  </otherwise>
+	</choose>
+  </select>
+  <select id="queryInvitorForCount" resultType="int">
+    select count(*) 
+    from customer 
+    where inviter_phone = #{cellphone,jdbcType=VARCHAR}
+  </select>
+  <select id="selectById" parameterType="int" resultMap="ResultMap">
+  	select <include refid="columns" /> from customer c left join channel ch on c.channel_id = ch.id where c.id = #{id}
+  </select>
+  <select id="selectByCellphone" resultMap="ResultMap">
+  	select <include refid="columns" /> from customer c left join channel ch on c.channel_id = ch.id where c.cellphone = #{cellphone}
+  </select>
+  <select id="selectByIdcard" resultMap="ResultMap">
+  	select <include refid="columns" /> from customer c left join channel ch on c.channel_id = ch.id where c.idcard = #{idcard}
+  </select>
+  <select id="selectInvitationList" resultMap="ResultMap">
+  	select <include refid="columns" /> from customer c left join channel ch on c.channel_id = ch.id 
+  	<where>
+   		<if test="cellphone != null">
+	    	c.inviter_phone = #{cellphone}
+	    </if>
+    </where>
+    order by c.id desc
+   	<choose>
+	  <when test="offset > 0 and size > 0">
+      <![CDATA[
+      limit #{offset}, #{size}
+      ]]>
+	  </when>
+	  <when test="size > 0">
+      <![CDATA[
+      limit 0, #{size}
+      ]]>
+	  </when>
+	  <otherwise>
+	  <![CDATA[
+	  limit 0, 15
+	  ]]>
+	  </otherwise>
+	</choose>
+  </select>
+  <select id="selectInvitationCount" resultType="int">
+  	select count(*) from customer c left join channel ch on c.channel_id = ch.id      
+    <where>
+   		<if test="cellphone != null">
+	    	c.inviter_phone = #{cellphone}
+	    </if>
+    </where>
+  </select>
+  <insert id="insert" parameterType="Customer" useGeneratedKeys="true" keyProperty="id">
+    insert into customer
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="name != null">
+        name,
+      </if>
+      <if test="idcard != null">
+        idcard,
+      </if>
+      <if test="loginPassword != null" >
+        login_password,
+      </if>
+      <if test="tradePassword != null" >
+        trade_password,
+      </if>
+      <if test="cellphone != null">
+        cellphone,
+      </if>
+      <if test="inviterPhone != null">
+        inviter_phone,
+      </if>
+      <if test="bankNO != null">
+        bank_no,
+      </if>
+      <if test="bankName != null">
+        bank_name,
+      </if>
+      <if test="cardNO != null">
+        card_no,
+      </if>
+      <if test="registerTime != null" >
+        register_time,
+      </if>
+      <if test="tradeTime != null" >
+        trade_time,
+      </if>
+      <if test="channel != null and channel.id > 0">
+        channel_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="idcard != null">
+        #{idcard,jdbcType=VARCHAR},
+      </if>
+      <if test="loginPassword != null" >
+        #{loginPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="tradePassword != null" >
+        #{tradePassword,jdbcType=VARCHAR},
+      </if>
+      <if test="cellphone != null">
+        #{cellphone,jdbcType=VARCHAR},
+      </if>
+      <if test="inviterPhone != null">
+        #{inviterPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="bankNO != null">
+        #{bankNO,jdbcType=VARCHAR},
+      </if>
+      <if test="bankName != null">
+        #{bankName,jdbcType=VARCHAR},
+      </if>
+      <if test="cardNO != null">
+        #{cardNO,jdbcType=VARCHAR},
+      </if>
+      <if test="registerTime != null" >
+        #{registerTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="tradeTime != null">
+        #{tradeTime, jdbcType=TIMESTAMP},
+      </if>
+      <if test="channel != null and channel.id > 0">
+        #{channel.id, jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="update" parameterType="Customer" >
+    update customer
+    <set>
+      <if test="name != null">
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="idcard != null">
+        idcard = #{idcard,jdbcType=VARCHAR},
+      </if>
+      <if test="cellphone != null">
+        cellphone = #{cellphone,jdbcType=VARCHAR},
+      </if>
+      <if test="balance >= 0">
+        balance = #{balance,jdbcType=DOUBLE},
+      </if>
+      <if test="inviterPhone != null">
+        inviter_phone = #{inviterPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="bankNO != null">
+        bank_no = #{bankNO,jdbcType=VARCHAR},
+      </if>
+      <if test="bankName != null">
+        bank_name = #{bankName,jdbcType=VARCHAR},
+      </if>
+      <if test="cardNO != null">
+        card_no = #{cardNO,jdbcType=VARCHAR},
+      </if>
+      <if test="loginPassword != null">
+        login_password = #{loginPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="tradePassword != null">
+        trade_password = #{tradePassword,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeTime != null">
+        trade_time = #{tradeTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

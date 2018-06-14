@@ -1,0 +1,35 @@
+﻿2017-09-15
+ALTER TABLE `customer_balance`
+MODIFY COLUMN `category`  tinyint(4) NOT NULL DEFAULT 0 COMMENT '类型 1:充值;2:提现;3.购买;4.回款;' AFTER `customer_id`;
+
+2017-10-22
+INSERT INTO `resource` VALUES ('5000', '消息推送管理', '', '/operation/message/list', '1', 'MENU', '50', '1');
+INSERT INTO `role_resource` VALUES ('1', '5000');
+
+ALTER TABLE `coupon`
+ADD COLUMN `valid_days`  int(10) NOT NULL DEFAULT 0 COMMENT '领取后多少天到期';
+
+2017-10-23
+ALTER TABLE `customer_order`
+MODIFY COLUMN `id`  int(11) UNSIGNED NOT NULL AUTO_INCREMENT FIRST ;
+
+2017-11-01
+ALTER TABLE `channel`
+ADD COLUMN `download_url`  varchar(128) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT '渠道下载地址';
+
+2017-11-07
+DROP TABLE IF EXISTS `branch_bank`;
+CREATE TABLE `branch_bank` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `bank_no` varchar(8) NOT NULL DEFAULT '' COMMENT '银行编码',
+  `city_id` varchar(8) NOT NULL DEFAULT '' COMMENT '城市编码',
+  `branch_name` varchar(64) NOT NULL DEFAULT '' COMMENT '支行名称',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+2017-11-25
+ALTER TABLE `product`
+ADD COLUMN `payback`  int(10) NOT NULL DEFAULT 0 COMMENT '回款状态：0--未放款；1--放款成功；2--回款处理中；3--回款失败；4--回款成功';
+
+INSERT INTO `resource` VALUES ('2005', '回款管理', '', '/trade/payback', '1', 'MENU', '20', '1');
+INSERT INTO `role_resource` VALUES ('1', '2005');

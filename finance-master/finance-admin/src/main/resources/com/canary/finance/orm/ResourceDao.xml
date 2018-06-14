@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.ResourceDao" >
+  <resultMap id="ResultMap" type="Resource" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="icon" property="icon" jdbcType="VARCHAR" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="enable" property="enable" jdbcType="TINYINT" />
+    <result column="category" property="category" jdbcType="VARCHAR" />
+    <result column="parent_id" property="parentId" jdbcType="INTEGER" />
+    <result column="shortcut" property="shortcut" jdbcType="TINYINT" />
+  </resultMap>
+  <sql id="columns" >
+     id, name, icon, url, parent_id, shortcut
+  </sql>
+  <select id="selectAll" resultMap="ResultMap" >
+    select <include refid="columns" /> from resource where enable = 1
+  </select>
+  <select id="selectByRoleId" resultMap="ResultMap" parameterType="java.lang.Integer" >
+    select <include refid="columns" /> from resource where enable = 1 and id in (select resource_id from role_resource where role_id = #{roleId,jdbcType=INTEGER})
+  </select>
+  <select id="selectByParentIdAndRoleId" resultMap="ResultMap" >
+    select <include refid="columns" /> from resource  where enable = 1 and parent_id = #{parentId, jdbcType=INTEGER} 
+    and id in (select resource_id from role_resource where role_id = #{roleId,jdbcType=INTEGER})
+  </select>
+  <insert id="insertRoleResource" >
+  	insert into role_resource(role_id, resource_id) values
+  	<foreach collection="roleResources" item="roleResource" index="index" separator=",">
+	   (#{roleResource.roleId}, #{roleResource.resourceId})
+	 </foreach>
+  </insert>
+  <delete id="deleteRoleResource" parameterType="int">
+  	delete from role_resource where role_id = #{roleId}
+  </delete>
+</mapper>

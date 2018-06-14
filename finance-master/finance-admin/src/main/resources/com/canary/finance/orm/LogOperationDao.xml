@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.LogOperationDao" >
+  <resultMap id="ResultMap" type="LogOperation" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="request" property="request" jdbcType="VARCHAR" />
+    <result column="response" property="response" jdbcType="VARCHAR" />
+    <result column="gmt_modified" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="columns" >
+	id, `name`, request, response, gmt_modified
+  </sql>
+  <select id="queryForList" resultMap="ResultMap">
+    select <include refid="columns" /> from log_operation
+    <where>
+	    <if test="name != null">
+	      and `name` like '%${name}%'
+	    </if>
+	    <if test="beginTime != null and endTime != null">
+	    <![CDATA[
+      	  and #{beginTime} <= (DATE_FORMAT(gmt_modified,'%Y-%m-%d') and #{endTime} >= DATE_FORMAT(gmt_modified,'%Y-%m-%d'))
+      	]]>
+      	</if>
+    </where>
+    order by id desc
+    <choose>
+	  <when test="offset > 0 and size > 0">
+      <![CDATA[
+      limit #{offset}, #{size}
+      ]]>
+	  </when>
+	  <when test="size > 0">
+      <![CDATA[
+      limit 0, #{size}
+      ]]>
+	  </when>
+	  <otherwise>
+	  <![CDATA[
+	  limit 0, 15
+	  ]]>
+	  </otherwise>
+	</choose>
+  </select>
+  <select id="queryForCount" resultType="int">
+  	select count(*) from log_operation
+  	<where>
+	    <if test="name != null">
+	      and `name` like '%${name}%'
+	    </if>
+	    <if test="beginTime != null and endTime != null">
+	    <![CDATA[
+      	  and #{beginTime} <= (DATE_FORMAT(gmt_modified,'%Y-%m-%d') and #{endTime} >= DATE_FORMAT(gmt_modified,'%Y-%m-%d'))
+      	]]>
+      	</if>
+    </where>
+  </select>
+  <insert id="insert" parameterType="logOperation">
+    insert into log_operation
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      `name`,
+      request,
+      response
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{name,jdbcType=VARCHAR},
+      #{request,jdbcType=VARCHAR},
+      #{response,jdbcType=VARCHAR}
+    </trim>
+  </insert>
+</mapper>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.RoleDao" >
+  <resultMap id="ResultMap" type="Role" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="TINYINT" />
+    <result column="privacy" property="privacy" jdbcType="TINYINT" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="columns" >
+    id, name, status, privacy, remark
+  </sql>
+  <select id="selectAll" resultMap="ResultMap">
+    select <include refid="columns" /> from role
+  </select>
+  <select id="queryForList" resultMap="ResultMap" >
+    select <include refid="columns" /> from role
+    <where>
+        <if test="status >= 0">
+            status = #{status}
+        </if>        
+    </where> 
+  </select>
+  <select id="selectById" resultMap="ResultMap" parameterType="java.lang.Integer" >
+    select <include refid="columns" /> from role where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectByName" resultMap="ResultMap" >
+    select <include refid="columns" /> from role where name = #{name,jdbcType=VARCHAR}
+  </select>
+  <insert id="insert" parameterType="Role">
+    insert into role
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="update" parameterType="Role" >
+    update role
+    <set>
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      	status = #{status,jdbcType=TINYINT},
+      	privacy = #{privacy,jdbcType=TINYINT},
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

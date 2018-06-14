@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.canary.finance.orm.CustomerBalanceDao" >
+  <resultMap id="ResultMap" type="CustomerBalance" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="serial_no" property="serialNO" jdbcType="VARCHAR" />
+    <result column="amount" property="amount" jdbcType="INTEGER" />
+    <result column="category" property="category" jdbcType="TINYINT" />
+    <result column="response_code" property="responseCode" jdbcType="VARCHAR" />
+    <result column="response_desc" property="responseDesc" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="TINYINT" />
+    <result column="gmt_modified" property="createTime" jdbcType="TIMESTAMP" />
+    <association property="customer" javaType="Customer">
+      <id column="customer_id" property="id" />
+    </association>
+  </resultMap>
+  <sql id="columns">
+    id, serial_no, customer_id, amount, category, response_code, response_desc, status, gmt_modified
+  </sql>
+  <select id="queryVOForList" resultType="CustomerBalanceVO">
+    select id, amount/100 amount, category, response_desc remark, DATE_FORMAT(gmt_modified, '%Y-%m-%d %H:%i:%S') tradeTime
+    from customer_balance
+	<where>
+		customer_id = #{customerId}
+		<if test="type == 1">
+			and category in (1, 2)
+		</if>
+		<if test="type == 0">
+			and category in (0, 3)
+		</if>
+	</where>
+	  order by id desc
+	<choose>
+	  <when test="offset > 0 and size > 0">
+      limit #{offset}, #{size}
+	  </when>
+	  <when test="size > 0">
+      <![CDATA[
+      limit 0, #{size}
+      ]]>
+	  </when>
+	  <otherwise>
+	  <![CDATA[
+	  limit 0, 15
+	  ]]>
+	  </otherwise>
+	</choose>
+  </select>
+  <select id="queryVOForCount" resultType="int">
+  	select count(*) 
+  	from customer_balance
+	<where>
+		customer_id = #{customerId}
+		<if test="type == 1">
+			and category in (1, 2)
+		</if>
+		<if test="type == 0">
+			and category in (0, 3)
+		</if>
+	</where>
+  </select>
+  <select id="queryForList" resultMap="ResultMap">
+    select <include refid="columns" /> from customer_balance
+	<where>
+      <if test="customerId > 0">
+      	customer_id = #{customerId}
+      </if>
+	</where>
+	order by id desc
+	<choose>
+	  <when test="offset > 0 and size > 0">
+      limit #{offset}, #{size}
+	  </when>
+	  <when test="size > 0">
+      <![CDATA[
+      limit 0, #{size}
+      ]]>
+	  </when>
+	  <otherwise>
+	  <![CDATA[
+	  limit 0, 15
+	  ]]>
+	  </otherwise>
+	</choose>
+  </select>
+  <select id="queryForCount" resultType="int">
+  	select count(*) from customer_balance
+	<where>
+      <if test="customerId > 0">
+      	customer_id = #{customerId}
+      </if>
+	</where>
+  </select>
+  <select id="selectById" resultMap="ResultMap">
+    select <include refid="columns" /> from customer_balance where id = #{id}
+  </select>
+  <select id="selectBySerialNO" resultMap="ResultMap">
+    select <include refid="columns" /> from customer_balance where serial_no = #{serialNO}
+  </select>
+  <insert id="insert" parameterType="CustomerBalance" useGeneratedKeys="true" keyProperty="id">
+     insert into customer_balance
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="serialNO != null" >
+        serial_no,
+      </if>
+      <if test="amount > 0" >
+        amount,
+      </if>
+      <if test="category >= 0" >
+        category,
+      </if>
+      <if test="responseCode != null" >
+        response_code,
+      </if>
+      <if test="responseDesc != null" >
+        response_desc,
+      </if>
+      <if test="customer != null and customer.id > 0">
+        customer_id, 
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="serialNO != null" >
+        #{serialNO,jdbcType=VARCHAR},
+      </if>
+      <if test="amount > 0" >
+        #{amount,jdbcType=INTEGER},
+      </if>
+      <if test="category >= 0" >
+        #{category,jdbcType=TINYINT},
+      </if>
+      <if test="responseCode != null" >
+        #{responseCode,jdbcType=VARCHAR},
+      </if>
+      <if test="responseDesc != null" >
+        #{responseDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="customer != null and customer.id > 0" >
+        #{customer.id,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="update">
+	update customer_balance
+	<set>
+	  <if test="amount > 0">
+		amount = #{amount,jdbcType=INTEGER},
+	  </if>
+	  <if test="category >= 0">
+		category = #{category,jdbcType=INTEGER},
+	  </if>
+	  <if test="responseCode != null">
+		response_code = #{responseCode,jdbcType=VARCHAR},
+	  </if>
+	  <if test="responseDesc != null">
+		response_desc = #{responseDesc,jdbcType=VARCHAR},
+	  </if>
+	  <if test="status >= 0">
+       	status = #{status,jdbcType=TINYINT},   
+      </if>
+	</set>
+	where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

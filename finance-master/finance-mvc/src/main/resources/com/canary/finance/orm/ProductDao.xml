@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.ProductDao">
+ <resultMap type="Product" id="resultMap">
+  <id column="id" property="id" jdbcType="INTEGER"/>
+  <result column="name" property="name" jdbcType="VARCHAR"/>
+  <result column="label" property="label" jdbcType="VARCHAR"/>
+  <result column="year_income" property="yearIncome" jdbcType="DOUBLE"/> 
+  <result column="total_amount" property="totalAmount" jdbcType="INTEGER"/>
+  <result column="actual_amount" property="actualAmount" jdbcType="INTEGER"/>
+  <result column="finance_period" property="financePeriod" jdbcType="INTEGER"/>
+  <result column="repayment" property="repayment" jdbcType="TINYINT"/>
+  <result column="lowest_money" property="lowestMoney" jdbcType="INTEGER"/>
+  <result column="highest_money" property="highestMoney" jdbcType="INTEGER"/>
+  <result column="increase_interest" property="increaseInterest" jdbcType="DOUBLE"/>
+  <result column="loan_year_income" property="loanYearIncome" jdbcType="DOUBLE"/>
+  <result column="raised_time" property="raisedTime" jdbcType="TIMESTAMP"/>
+  <result column="interest_date" property="interestDate" jdbcType="DATE"/>
+  <result column="summary" property="summary" jdbcType="LONGVARCHAR"/>
+  <result column="risk" property="risk" jdbcType="LONGVARCHAR"/>
+  <result column="attachment" property="attachment" jdbcType="LONGVARCHAR"/>
+  <result column="sorting" property="sorting" jdbcType="SMALLINT"/>
+  <result column="status" property="status" jdbcType="TINYINT"/>
+  <association property="category" javaType="ProductCategory">
+    	<id column="category_id" property="id" jdbcType="INTEGER" />
+    	<result column="category_property" property="property" jdbcType="VARCHAR"/>
+    	<result column="category_name" property="name" jdbcType="VARCHAR" />
+  </association>
+  <association property="merchant" javaType="Merchant">
+     <id column="merchant_id" property="id" jdbcType="INTEGER" />
+     <result column="merchant_name" property="name" jdbcType="VARCHAR" />
+     <result column="merchant_cellphone" property="cellphone" jdbcType="VARCHAR" />
+  </association>
+ </resultMap>
+ <sql id="columns">
+   p.id, p.name, p.label, p.year_income, p.total_amount, p.actual_amount, p.finance_period, p.repayment, p.lowest_money, p.highest_money, p.increase_interest, p.loan_year_income,
+   p.raised_time, p.interest_date, p.summary, p.risk, p.attachment, p.sorting, p.status, p.category_id, c.name category_name, c.property category_property, p.merchant_id, 
+   m.name merchant_name, m.cellphone merchant_cellphone
+ </sql>
+ <select id="queryForList" resultMap="resultMap">
+   select <include refid="columns"/> from product p 
+   left join product_category c on p.category_id = c.id  
+   left join merchant m on p.merchant_id = m.id
+   <where>
+   	  and p.status = 1
+      <if test="categoryId > 0">
+        and p.category_id = #{categoryId}
+      </if>
+      <if test="periodStart > 0 and periodEnd > periodStart">
+	  	<![CDATA[ and p.finance_period >= #{periodStart} and p.finance_period <= #{periodEnd}]]>
+	  </if>
+   </where>
+    <![CDATA[
+		order by
+		IF((p.status =1 and p.raised_time > NOW()),1,IF((p.status =1 and p.raised_time <= NOW() and (p.actual_amount < p.total_amount)),0,2)),            
+		IF((p.status =1 and  p.actual_amount < p.total_amount), p.sorting, false) desc,  
+		p.raised_time desc, p.id desc
+   	]]>
+	<choose>
+	  <when test="offset > 0 and size > 0">
+	     <![CDATA[
+	     limit #{offset}, #{size}
+	     ]]>
+	  </when>
+	  <when test="size > 0">
+	     <![CDATA[
+	     limit 0, #{size}
+	     ]]>
+	  </when>
+	  <otherwise>
+	  <![CDATA[
+	   limit 0, 8
+	  ]]>
+	  </otherwise>
+	</choose>
+ </select>
+ <select id="queryForCount" resultType="int">
+   select count(*) from product p 
+   left join product_category c on p.category_id = c.id  
+   left join merchant m on p.merchant_id = m.id
+   <where>
+  	  and p.status = 1
+      <if test="categoryId > 0">
+        and p.category_id = #{categoryId}
+      </if>
+      <if test="periodStart > 0 and periodEnd > periodStart">
+	  	<![CDATA[ and p.finance_period >= #{periodStart} and p.finance_period <= #{periodEnd}]]>
+	  </if>
+   </where> 
+ </select>
+ <select id="selectById" parameterType="int" resultMap="resultMap">
+   select <include refid="columns"/> from product p 
+   left join product_category c on p.category_id = c.id  
+   left join merchant m on p.merchant_id = m.id
+   where p.id = #{id} 
+ </select>
+ <select id="selectTopNovice" resultMap="resultMap">
+   select <include refid="columns"/> from product p 
+   left join product_category c on p.category_id = c.id  
+   left join merchant m on p.merchant_id = m.id
+   where c.property = 'NOVICE' and p.status = 1
+   order by p.sorting, p.raised_time desc, p.id desc
+   limit 0, 1
+ </select>
+ <select id="selectTop4" resultMap="resultMap">
+   select <include refid="columns"/> from product p 
+   left join product_category c on p.category_id = c.id  
+   left join merchant m on p.merchant_id = m.id
+   where c.property != 'NOVICE' and p.status = 1
+   order by p.sorting, p.raised_time desc, p.id desc
+   limit 0, 4
+ </select>
+ <update id="update" parameterType="Product" >
+    update product
+    <set>
+      <if test="totalAmount > 0" >
+        total_amount = #{totalAmount,jdbcType=INTEGER},
+      </if>
+      <if test="actualAmount > 0" >
+        actual_amount = #{actualAmount,jdbcType=INTEGER},
+      </if>
+      <if test="interestDate != null">
+        interest_date = #{interestDate,jdbcType=DATE},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

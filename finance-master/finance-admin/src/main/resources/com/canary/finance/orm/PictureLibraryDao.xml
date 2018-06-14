@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.PictureLibraryDao" >
+  <resultMap id="ResultMap" type="PictureLibrary" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="link" property="link" jdbcType="VARCHAR" />
+    <result column="platform" property="platform" jdbcType="TINYINT" />
+    <result column="status" property="status" jdbcType="TINYINT" />
+  </resultMap>
+  <sql id="columns" >
+    id, name, url, content, link, status, platform
+  </sql>
+  <select id="queryForList" resultMap="ResultMap">
+    select <include refid="columns" /> from picture_library 
+    <where>
+      <if test="platform >= 0">
+        and platform = #{platform}
+      </if>  
+      <if test="status >= 0">
+        and status = #{status}
+      </if>  
+    </where>     
+    order by status desc
+    <choose>
+	  <when test="offset > 0 and size > 0">
+	    <![CDATA[
+	    limit #{offset}, #{size}
+	    ]]>
+	  </when>
+	  <when test="size > 0">
+	    <![CDATA[
+	    limit 0, #{size}
+	    ]]>
+	  </when>
+	  <otherwise>
+		<![CDATA[
+		limit 0, 15
+		]]>
+	  </otherwise>
+	</choose>
+  </select>
+  <select id="queryForCount" resultType="int">
+  	select count(*) from picture_library
+   	<where>
+      <if test="platform >= 0">
+        and platform = #{platform}
+      </if>  
+      <if test="status >= 0">
+        and status = #{status}
+      </if>  
+    </where>   
+  </select>
+  <select id="selectById" resultMap="ResultMap">
+    select <include refid="columns" /> from picture_library where id = #{id}
+  </select>
+  <select id="selectByNameAndPlatform" resultMap="ResultMap">
+  	select <include refid="columns" />  from picture_library where name = #{name} and platform = #{platform}
+  </select>
+  <insert id="insert" parameterType="PictureLibrary"  useGeneratedKeys="true" keyProperty="id" >
+    insert into picture_library
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="url != null" >
+        url,
+      </if>
+      <if test="content != null" >
+        content,
+      </if>
+      <if test="link != null" >
+        link,
+      </if>
+      <if test="status >= 0" >
+        status,
+      </if>
+      <if test="platform >= 0 " >
+        platform,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR}, 
+      </if>
+      <if test="url != null" >
+        #{url,jdbcType=VARCHAR}, 
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=VARCHAR}, 
+      </if>
+      <if test="link != null" >
+        #{link,jdbcType=VARCHAR}, 
+      </if>
+       <if test="status >= 0" >
+        #{status,jdbcType=TINYINT}, 
+      </if>
+      <if test="platform >= 0 " >
+        #{platform,jdbcType=INTEGER}, 
+      </if>
+    </trim>
+  </insert>
+  <update id="update" parameterType="PictureLibrary" >
+    update picture_library
+    <set >
+      <if test="name != null">
+        name = #{name},
+      </if>
+      <if test="url != null">
+        url = #{url},
+      </if>
+      <if test="content != null">
+        content = #{content},
+      </if>
+      <if test="link != null">
+        link = #{link},
+      </if>
+      <if test="status >= 0">
+        status = #{status},
+      </if>
+      <if test="platform >= 0 ">
+        platform = #{platform},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

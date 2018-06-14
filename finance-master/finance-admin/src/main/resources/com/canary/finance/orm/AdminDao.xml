@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.AdminDao" >
+  <resultMap id="ResultMap" type="Admin" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="ip" property="ip" jdbcType="VARCHAR" />
+    <result column="real_name" property="realName" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="TINYINT" />
+    <result column="cellphone" property="cellphone" jdbcType="VARCHAR" />
+    <result column="totp" property="totp" jdbcType="TINYINT" />
+    <result column="token" property="token" jdbcType="VARCHAR" />
+    <association property="role" javaType="Role">
+    	<id column="role_id" property="id" jdbcType="INTEGER" />
+    	<result column="role_name" property="name" jdbcType="VARCHAR" />
+    	<result column="role_status" property="status" jdbcType="TINYINT" />
+  	</association>
+  </resultMap>
+  <sql id="columns" >
+    ad.id id, ad.name name, ip, real_name, ad.status status, cellphone, totp, token, role_id, ro.name role_name, ro.status role_status
+  </sql>
+  <select id="queryForList" resultMap="ResultMap">
+    select <include refid="columns" />
+    <![CDATA[ from admin ad left join role ro on ad.role_id=ro.id where ad.id > 1 order by id desc ]]>
+    <choose>
+	  <when test="offset > 0 and size > 0">
+      <![CDATA[
+      limit #{offset}, #{size}
+      ]]>
+	  </when>
+	  <when test="size > 0">
+      <![CDATA[
+      limit 0, #{size}
+      ]]>
+	  </when>
+	  <otherwise>
+	  <![CDATA[
+	    limit 0, 15
+	  ]]>
+	  </otherwise>
+	</choose>
+  </select>
+  <select id="queryForCount" resultType="int">
+  	<![CDATA[ select count(*) from admin where id > 1 ]]>
+  </select>
+  <select id="selectByName" resultMap="ResultMap" >
+    select <include refid="columns" />
+    from admin ad left join role ro on ad.role_id=ro.id where ad.name = #{name,jdbcType=VARCHAR}
+  </select>
+  <select id="selectById" resultMap="ResultMap" parameterType="java.lang.Integer" >
+    select <include refid="columns" />
+    from admin ad left join role ro on ad.role_id=ro.id where ad.id = #{id,jdbcType=INTEGER}
+  </select>
+  <insert id="insert" parameterType="Admin">
+    insert into admin
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="ip != null" >
+        ip,
+      </if>
+      <if test="realName != null" >
+        real_name,
+      </if>
+      <if test="cellphone != null" >
+        cellphone,
+      </if>
+      <if test="totp >= 0" >
+        totp,
+      </if>
+      <if test="status >= 0" >
+        status,
+      </if>
+      <if test="token != null" >
+        token,
+      </if>
+      <if test="role != null and role.id > 0 " >
+        role_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="ip != null" >
+        #{ip,jdbcType=VARCHAR},
+      </if>
+      <if test="realName != null" >
+        #{realName,jdbcType=VARCHAR},
+      </if>
+      <if test="cellphone != null" >
+        #{cellphone,jdbcType=VARCHAR},
+      </if>
+      <if test="totp >= 0" >
+        #{totp,jdbcType=TINYINT},
+      </if>
+      <if test="status >= 0" >
+        #{status,jdbcType=TINYINT},
+      </if>
+      <if test="token != null" >
+        #{token,jdbcType=VARCHAR},
+      </if>
+      <if test="role != null and role.id > 0" >
+        #{role.id,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="update" parameterType="Admin" >
+    update admin
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="ip != null" >
+        ip = #{ip,jdbcType=VARCHAR},
+      </if>
+      <if test="realName != null" >
+        real_name = #{realName,jdbcType=VARCHAR},
+      </if>
+      <if test="cellphone != null" >
+        cellphone = #{cellphone,jdbcType=VARCHAR},
+      </if>
+      <if test="totp >= 0" >
+        totp = #{totp,jdbcType=TINYINT},
+      </if>
+      <if test="status >= 0" >
+        status = #{status,jdbcType=TINYINT},
+      </if>
+      <if test="token != null" >
+        token = #{token,jdbcType=VARCHAR},
+      </if>
+      <if test="role != null and role.id > 0" >
+        role_id = #{role.id,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

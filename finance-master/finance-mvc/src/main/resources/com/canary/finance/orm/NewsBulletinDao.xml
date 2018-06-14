@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.NewsBulletinDao">
+  <resultMap type="NewsBulletin" id="resultMap">
+    <id column="id" property="id" jdbcType="INTEGER"/>
+	<result column="type" property="type" jdbcType="TINYINT"/>
+	<result column="status" property="status" jdbcType="TINYINT"/>
+	<result column="hits" property="hits" jdbcType="INTEGER"/>
+	<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	<association property="news" javaType="NewsMaterial">
+	  <id column="news_id" property="id" jdbcType="INTEGER"/>
+	  <result column="news_title"  property="title" jdbcType="VARCHAR" />
+	  <result column="news_source"  property="source" jdbcType="VARCHAR" />
+	  <result column="news_content"  property="content" jdbcType="VARCHAR" />
+	  <result column="news_url"  property="url" jdbcType="VARCHAR" />
+	  <result column="news_date"  property="newsDate" jdbcType="VARCHAR" />
+	  <result column="news_remark"  property="remark" jdbcType="VARCHAR" />
+	</association>
+  </resultMap>
+	<sql id="columns">
+	  a.id, a.news_id, a.type, a.status, a.hits, a.create_time, n.title news_title, n.source news_source, n.content news_content,
+	  n.url news_url, n.news_date, n.remark news_remark
+	</sql>
+	<select id="queryForList" resultMap="resultMap">
+	  select <include refid="columns"/> from news_bulletin a 
+	  left join news_material n on a.news_id = n.id
+	  <where>
+	  	a.status = 1
+        <if test="type > 0 ">
+          and a.type = #{type}  
+        </if>
+      </where>
+      order by a.id desc
+      <choose>
+		<when test="offset > 0 and size > 0">
+		  <![CDATA[
+		    limit #{offset}, #{size}
+		  ]]>
+		</when>
+		<when test="size > 0">
+		  <![CDATA[
+		    limit 0, #{size}
+		  ]]>
+		</when>
+		<otherwise>
+		<![CDATA[
+		  limit 0, 15
+		]]>
+		</otherwise>
+      </choose>
+	</select>
+	<select id="queryForCount" resultType="int">
+	  select count(*) from news_bulletin a 
+	  left join news_material n on a.news_id = n.id
+	  <where>
+	  	a.status = 1
+        <if test="type > 0 ">
+          and a.type = #{type}  
+        </if>
+      </where>
+	</select>
+	<select id="selectById" resultMap="resultMap">
+	  select <include refid="columns"/> from news_bulletin a left join news_material n on a.news_id = n.id where a.id = #{id}
+	</select>
+	<select id="selectTopN" resultMap="resultMap">
+	  select <include refid="columns"/> from news_bulletin a 
+	  left join news_material n on a.news_id = n.id
+	  where a.status = 1 and type = #{type} order by a.id desc
+	  limit 0, ${n}
+	</select>
+	<select id="queryVOForList" resultType="MaterialVO">
+	  select a.id, n.title, n.title shareDesc, a.news_id materialId,
+	  	n.image imageUrl, n.url link, n.content, n.remark, n.news_date newsDate
+	  from news_bulletin a 
+	  left join news_material n on a.news_id=n.id
+	  <where>
+        a.news_id > 0 and a.status = 1
+        <if test="type > 0 ">
+          and a.type = #{type}  
+        </if>
+      </where>
+      order by a.id desc
+      <choose>
+		<when test="offset > 0 and size > 0">
+		  <![CDATA[
+		    limit #{offset}, #{size}
+		  ]]>
+		</when>
+		<when test="size > 0">
+		  <![CDATA[
+		    limit 0, #{size}
+		  ]]>
+		</when>
+		<otherwise>
+		<![CDATA[
+		  limit 0, 15
+		]]>
+		</otherwise>
+      </choose>
+	</select>
+	<select id="queryVOForCount" resultType="int">
+	  select count(*) from news_bulletin a 
+	  left join news_material n on a.news_id = n.id
+	  <where>
+        a.news_id > 0 and a.status = 1
+        <if test="type > 0 ">
+          and a.type = #{type}  
+        </if>
+      </where>
+	</select>
+	<select id="selectVOById" resultType="MaterialVO">
+	  select a.id, n.title, n.title shareDesc, a.news_id materialId,
+	  	n.image imageUrl, n.url link, n.content, n.remark, n.news_date newsDate
+	  from news_bulletin a 
+	  left join news_material n on a.news_id = n.id 
+	  where a.id = #{id}
+	</select>
+	<update id="update" parameterType="int">
+	  update news_bulletin set hits = hits+1 where id = #{id}
+   </update>
+</mapper>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.FaqDao">
+	<resultMap type="Faq" id="resultMap">
+	    <id column="id" property="id" jdbcType="INTEGER"/>
+	    <result column="ask" property="ask" jdbcType="VARCHAR"/>
+	    <result column="question" property="question" jdbcType="VARCHAR"/>
+	    <result column="status" property="status" jdbcType="TINYINT"/>
+	</resultMap>
+	<sql id="columns">
+	    id, ask, question, status
+	</sql>
+	<select id="selectAll" resultMap="resultMap">
+	    select <include refid="columns"/> from faq where status = 1
+	</select>
+  	<select id="selectById" resultMap="resultMap">
+	    select <include refid="columns"/> from faq where id = #{id}
+	</select>
+</mapper>

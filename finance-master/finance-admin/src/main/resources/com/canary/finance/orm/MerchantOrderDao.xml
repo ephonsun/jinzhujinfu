@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.MerchantOrderDao" >
+  <resultMap id="ResultMap" type="MerchantOrder" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="order_no" property="orderNO" jdbcType="VARCHAR" />
+    <result column="principal" property="principal" jdbcType="DOUBLE" />
+    <result column="order_time" property="orderTime" jdbcType="TIMESTAMP" />
+    <result column="payback_amount" property="paybackAmount" jdbcType="DOUBLE" />
+    <result column="payback_time" property="paybackTime" jdbcType="TIMESTAMP" />
+    <result column="payback_no" property="paybackNO" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="TINYINT" />
+    <association property="product" javaType="Product">
+	    <id column="product_id" property="id" jdbcType="INTEGER" />
+	    <result column="product_name" property="name" jdbcType="VARCHAR" />
+    </association>
+    <association property="merchant" javaType="Merchant">
+		<id column="merchant_id" property="id" jdbcType="INTEGER" />
+	    <result column="merchant_name" property="name" jdbcType="VARCHAR" />
+	</association>
+  </resultMap>
+  <sql id="columns" >
+	mo.id, mo.order_no, mo.principal, mo.order_time, mo.payback_amount, mo.payback_time, mo.payback_no, mo.status,
+	mo.id product_id, p.name product_name, mo.merchant_id, m.name merchant_name
+  </sql>
+  <select id="queryForList" resultMap="ResultMap">
+    select <include refid="columns" /> from merchant_order mo
+	left join product p on p.id = mo.product_id
+	left join merchant m on m.id = mo.merchant_id
+    <where>
+      <if test="merchantId > 0">
+	    mo.merchant_id = #{merchantId}
+	  </if>
+      <if test="orderNO != null">
+	    and mo.order_no like '${orderNO}%'
+	  </if>
+	  <if test="productName != null">
+	    and p.name like '${productName}%'
+	  </if>
+	  <if test="status >= 0">
+	    and mo.status = #{status}
+	  </if>
+	  <if test="orderType == 0">
+        <if test="beginTime != null and endTime != null">
+      	<![CDATA[
+      	and #{beginTime} <= DATE_FORMAT(mo.order_time,'%Y-%m-%d') and #{endTime} >= DATE_FORMAT(mo.order_time,'%Y-%m-%d')
+      	]]>
+        </if>
+      </if>
+      <if test="orderType == 1">
+      	<if test="beginTime != null and endTime != null">
+      	<![CDATA[
+      	and #{beginTime} <= DATE_FORMAT(mo.payback_time,'%Y-%m-%d') and #{endTime} >= DATE_FORMAT(mo.payback_time,'%Y-%m-%d')
+      	]]>
+        </if>
+      </if>
+    </where>
+    ORDER BY mo.id DESC
+    <choose>
+	  <when test="offset > 0 and size > 0">
+      <![CDATA[
+      limit #{offset}, #{size}
+      ]]>
+	  </when>
+	  <when test="size > 0">
+      <![CDATA[
+      limit 0, #{size}
+      ]]>
+	  </when>
+	  <otherwise>
+	  <![CDATA[
+	  limit 0, 15
+	  ]]>
+	  </otherwise>
+	</choose>
+  </select>
+  <select id="queryForCount" resultType="int">
+  	select count(*) from merchant_order mo
+	left join product p on p.id = mo.product_id
+	left join merchant m on m.id = mo.merchant_id
+    <where>
+      <if test="merchantId > 0">
+	    mo.merchant_id = #{merchantId}
+	  </if>
+      <if test="orderNO != null">
+	    and mo.order_no like '${orderNO}%'
+	  </if>
+	  <if test="productName != null">
+	    and p.name like '${productName}%'
+	  </if>
+	  <if test="status >= 0">
+	    and mo.status = #{status}
+	  </if>
+	  <if test="orderType == 0">
+      	<if test="beginTime != null and endTime != null">
+      	<![CDATA[
+      	and #{beginTime} <= DATE_FORMAT(mo.payback_time,'%Y-%m-%d') and #{endTime} >= DATE_FORMAT(mo.payback_time,'%Y-%m-%d')
+      	]]>
+        </if>
+      </if>
+      <if test="orderType == 1">
+        <if test="beginTime != null and endTime != null">
+      	<![CDATA[
+      	and #{beginTime} <= DATE_FORMAT(mo.order_time,'%Y-%m-%d') and #{endTime} >= DATE_FORMAT(mo.order_time,'%Y-%m-%d')
+      	]]>
+        </if>
+      </if>
+    </where>
+  </select>
+  <select id="selectById" parameterType="java.lang.Integer" resultMap="ResultMap">
+    select <include refid="columns" /> from merchant_order mo
+	left join product p on p.id = mo.product_id
+	left join merchant m on m.id = mo.merchant_id
+	where id = #{id}
+  </select>
+  <select id="selectByOrderNO" resultMap="ResultMap">
+    select <include refid="columns" /> from merchant_order mo
+	left join product p on p.id = mo.product_id
+	left join merchant m on m.id = mo.merchant_id
+	where order_no = #{orderNO}
+  </select>
+  <select id="sumPrincipal" resultType="java.lang.Integer">
+  	select sum(principal) from merchant_order
+  </select>
+  <select id="sumPaybackAmount" resultType="java.lang.Double">
+  	select sum(payback_amount) from merchant_order
+  </select>
+  <insert id="insert" parameterType="MerchantOrder" useGeneratedKeys="true" keyProperty="id">
+    insert into merchant_order 
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="orderNO != null" >
+        order_no,
+      </if>
+      <if test="principal > 0" >
+        principal,
+      </if>
+      <if test="orderTime != null" >
+        order_time,
+      </if>
+      <if test="paybackAmount > 0" >
+        payback_amount,
+      </if>
+      <if test="paybackNO != null" >
+        payback_no,
+      </if>
+      <if test="paybackTime != null" >
+        payback_time,
+      </if>
+      <if test="product != null and product.id > 0">
+        product_id,
+      </if>
+      <if test="merchant != null and merchant.id > 0">
+        merchant_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="orderNO != null" >
+        #{orderNO,jdbcType=VARCHAR},
+      </if>
+      <if test="principal > 0" >
+        #{principal,jdbcType=REAL},
+      </if>
+      <if test="orderTime != null" >
+        #{orderTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="paybackNO != null" >
+        #{paybackNO,jdbcType=VARCHAR},
+      </if>
+      <if test="paybackAmount > 0" >
+        #{paybackAmount,jdbcType=DOUBLE},
+      </if>
+      <if test="paybackTime != null" >
+        #{paybackTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="product != null and product.id > 0">
+        #{product.id,jdbcType=INTEGER},
+      </if>
+      <if test="merchant != null and merchant.id > 0">
+        #{merchant.id,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="update">
+  	update merchant_order
+  	<set>
+      <if test="status >= 0">
+        status = #{status,jdbcType=TINYINT},
+      </if>
+      <if test="orderTime != null" >
+        order_time = #{orderTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="paybackNO != null">
+        payback_no = #{paybackNO,jdbcType=VARCHAR},
+      </if>
+      <if test="paybackTime != null">
+        payback_time = #{paybackTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="paybackAmount >= 0">
+        payback_amount = #{paybackAmount,jdbcType=DOUBLE},
+      </if>
+    </set>
+  	where order_no = #{orderNO,jdbcType=VARCHAR}
+  </update>
+</mapper>

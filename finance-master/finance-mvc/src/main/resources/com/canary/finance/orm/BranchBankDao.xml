@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.canary.finance.orm.BranchBankDao" >
+  <resultMap id="ResultMap" type="BranchBank" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="bank_no" property="bankNO" jdbcType="VARCHAR" />
+    <result column="city_id" property="cityId" jdbcType="VARCHAR" />
+    <result column="branch_name" property="branchName" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="columns" >
+    id, bank_no, city_id, branch_name
+  </sql>
+  <select id="selectByBankNOAndCityId" resultMap="ResultMap">
+    select <include refid="columns" /> from branch_bank where bank_no = #{bankNO, jdbcType=VARCHAR} and city_id = #{cityId,jdbcType=VARCHAR}
+  </select>
+</mapper>
